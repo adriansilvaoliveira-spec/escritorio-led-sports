@@ -11,5 +11,7 @@ mensagem em português dizendo o que mudou, e `git push`. Não deixe mudança s�
 - `data/*.json` (exceto os `*.exemplo.json`) fica fora do git de propósito: tem
   configuração, equipe e a chave do CallMeBot. O repositório é público — nunca
   versionar segredos.
+- `agente-desenho/`: formulário do funcionário Desenho (porta 4402). Grava cada pedido
+  em `ARTES\CLIENTES\<CLIENTE>` no Google Drive; dados de cliente nunca entram no git.
 - Ligar/desligar sem janela: `LIGAR-DESLIGAR ESCRITORIO.vbs` (atalho
   "Escritório LED SPORTS" na área de trabalho).

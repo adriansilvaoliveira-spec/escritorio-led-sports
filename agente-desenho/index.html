@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Novo desenho</title>
+<style>
+  :root { --fundo:#0d1120; --caixa:#151a2e; --linha:#2a3150; --texto:#e9edf8; --fraco:#98a2c0; --acento:#8b6cff; --erro:#ff7a6b; --ok:#23e08a; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--fundo); color:var(--texto); font:15px/1.45 system-ui,"Segoe UI",sans-serif; padding:20px 16px 40px; }
+  main { max-width:760px; margin:0 auto; }
+  h1 { font-size:22px; margin:0 0 4px; }
+  .sub { color:var(--fraco); margin:0 0 20px; }
+  section { background:var(--caixa); border:1px solid var(--linha); border-radius:12px; padding:16px; margin-bottom:14px; }
+  h2 { font-size:14px; margin:0 0 12px; letter-spacing:.02em; }
+  label { display:block; font-size:13px; color:var(--fraco); margin-bottom:5px; }
+  input[type=text], select, textarea { width:100%; background:var(--fundo); color:var(--texto); border:1px solid var(--linha); border-radius:8px; padding:10px; font:inherit; }
+  input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible { outline:2px solid var(--acento); outline-offset:1px; }
+  .campo + .campo { margin-top:12px; }
+  .dica { color:var(--fraco); font-size:13px; margin:6px 0 0; }
+  .aviso { color:#ffb020; }
+  .swatches { display:flex; flex-wrap:wrap; gap:6px; }
+  .swatches button { width:30px; height:30px; border-radius:7px; border:1px solid #ffffff40; cursor:pointer; padding:0; }
+  .swatches button[aria-pressed=true] { outline:3px solid var(--acento); outline-offset:1px; }
+  .anexos { display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); }
+  .anexo { border:1px dashed var(--linha); border-radius:10px; padding:12px; }
+  .anexo strong { display:block; margin-bottom:6px; font-size:14px; }
+  .anexo input { width:100%; color:var(--fraco); font-size:13px; }
+  .anexo ul { list-style:none; margin:8px 0 0; padding:0; font-size:13px; color:var(--fraco); overflow-wrap:anywhere; }
+  .enviar { width:100%; background:var(--acento); color:#fff; border:0; border-radius:10px; padding:13px; font:600 16px system-ui,"Segoe UI",sans-serif; cursor:pointer; }
+  .enviar:disabled { opacity:.6; cursor:default; }
+  #msg { margin-top:12px; overflow-wrap:anywhere; }
+  #msg.erro { color:var(--erro); }
+  #msg.ok { color:var(--ok); }
+  code { background:var(--fundo); padding:2px 5px; border-radius:5px; color:var(--texto); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Novo desenho</h1>
+  <p class="sub">Preencha o pedido. Ele fica salvo na pasta do cliente no Google Drive.</p>
+
+  <form id="f" novalidate>
+    <section>
+      <h2>Cliente e modelo</h2>
+      <div class="campo">
+        <label for="cliente">Nome do cliente ou time</label>
+        <input type="text" id="cliente" maxlength="80" autocomplete="off" required>
+      </div>
+      <div class="campo">
+        <label for="modelo">Modelo</label>
+        <select id="modelo" required><option value="">Carregando os moldes do Drive...</option></select>
+        <p class="dica" id="sobre-modelo"></p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Cores</h2>
+      <div class="campo"><label id="r-principal">Cor principal</label><div class="swatches" data-cor="principal" role="group" aria-labelledby="r-principal"></div></div>
+      <div class="campo"><label id="r-secundaria">Cor secundária</label><div class="swatches" data-cor="secundaria" role="group" aria-labelledby="r-secundaria"></div></div>
+      <div class="campo"><label id="r-detalhes">Cor dos detalhes</label><div class="swatches" data-cor="detalhes" role="group" aria-labelledby="r-detalhes"></div></div>
+      <div class="campo">
+        <label for="outras">Outras cores ou cor fora da paleta</label>
+        <input type="text" id="outras" maxlength="200" placeholder="ex.: gola preta com filete dourado">
+      </div>
+    </section>
+
+    <section>
+      <h2>Anexos</h2>
+      <div class="anexos">
+        <div class="anexo"><strong>Desenho ou referência</strong><input type="file" multiple data-tipo="desenho" aria-label="Desenho ou referência"><ul></ul></div>
+        <div class="anexo"><strong>Logo ou escudo</strong><input type="file" multiple data-tipo="logo" aria-label="Logo ou escudo"><ul></ul></div>
+        <div class="anexo"><strong>Patrocínios</strong><input type="file" multiple data-tipo="patrocinio" aria-label="Patrocínios"><ul></ul></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Como o cliente quer</h2>
+      <label for="obs">Observações</label>
+      <textarea id="obs" rows="4" maxlength="5000" placeholder="ex.: número nas costas em branco, patrocínio no peito, calção azul"></textarea>
+    </section>
+
+    <button class="enviar" id="enviar" type="submit">Enviar pedido</button>
+    <div id="msg" role="status" aria-live="polite"></div>
+  </form>
+</main>
+
+<script>
+const PALETA = ['#FFFFFF','#000000','#9B0300','#FF6600','#EEA235','#FFD300','#FFF000','#00FF00','#00601C','#009230','#00CDBD','#009FA0','#00B6EB','#009FE3','#00419C','#001A44','#59595F','#0000FF','#B2B1B7','#690683','#FFB6EB','#FF0082','#7F0019','#FF0000'];
+const $ = s => document.querySelector(s);
+const cores = { principal: '', secundaria: '', detalhes: '' };
+let modelos = [];
+
+document.querySelectorAll('.swatches').forEach(grupo => {
+  for (const hex of PALETA) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.style.background = hex; b.title = hex;
+    b.setAttribute('aria-label', hex); b.setAttribute('aria-pressed', 'false');
+    b.addEventListener('click', () => {
+      const sim = cores[grupo.dataset.cor] !== hex;
+      cores[grupo.dataset.cor] = sim ? hex : '';
+      grupo.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(sim && x === b)));
+    });
+    grupo.appendChild(b);
+  }
+});
+
+document.querySelectorAll('.anexo input').forEach(i => i.addEventListener('change', () => {
+  const ul = i.nextElementSibling; ul.textContent = '';
+  for (const f of i.files) { const li = document.createElement('li'); li.textContent = f.name; ul.appendChild(li); }
+}));
+
+async function carregarModelos() {
+  const sel = $('#modelo');
+  try {
+    const d = await (await fetch('/api/modelos')).json();
+    if (!d.ok) throw new Error(d.motivo);
+    modelos = d.modelos;
+    sel.textContent = '';
+    sel.add(new Option('Escolha o modelo', ''));
+    const grupos = new Map();
+    for (const m of modelos) {
+      if (!grupos.has(m.grupo)) { const g = document.createElement('optgroup'); g.label = m.grupo; sel.appendChild(g); grupos.set(m.grupo, g); }
+      grupos.get(m.grupo).appendChild(new Option(m.nome, m.nome));
+    }
+  } catch (e) {
+    sel.textContent = ''; sel.add(new Option('Não consegui ler os moldes', ''));
+    mensagem('erro', e.message);
+  }
+}
+
+$('#modelo').addEventListener('change', e => {
+  const m = modelos.find(x => x.nome === e.target.value), s = $('#sobre-modelo');
+  s.className = 'dica' + (m && !m.mockup ? ' aviso' : '');
+  s.textContent = !m ? '' : m.mockup ? 'Mockup: ' + m.mockup : 'Este modelo ainda não tem mockup no Drive. O pedido segue, e o Desenho te pergunta o que usar.';
+});
+
+function mensagem(tipo, texto) { const el = $('#msg'); el.className = tipo; el.textContent = texto; }
+
+$('#f').addEventListener('submit', async e => {
+  e.preventDefault();
+  const cliente = $('#cliente').value.trim(), modelo = $('#modelo').value;
+  if (!cliente) { $('#cliente').focus(); return mensagem('erro', 'Falta o nome do cliente.'); }
+  if (!modelo) { $('#modelo').focus(); return mensagem('erro', 'Falta escolher o modelo.'); }
+
+  const botao = $('#enviar'); botao.disabled = true;
+  try {
+    mensagem('', 'Criando a pasta do cliente...');
+    const p = await (await fetch('/api/pedido', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cliente, modelo, cores: Object.assign({ outras: $('#outras').value }, cores), observacoes: $('#obs').value }) })).json();
+    if (!p.ok) throw new Error(p.motivo);
+
+    const arquivos = [];
+    document.querySelectorAll('.anexo input').forEach(i => { for (const f of i.files) arquivos.push({ f, tipo: i.dataset.tipo }); });
+    let n = 0;
+    for (const { f, tipo } of arquivos) {
+      mensagem('', `Enviando anexo ${++n} de ${arquivos.length}: ${f.name}`);
+      const r = await (await fetch(`/api/pedido/${p.id}/arquivo?tipo=${tipo}&nome=${encodeURIComponent(f.name)}`, { method: 'PUT', body: f })).json();
+      if (!r.ok) throw new Error(r.motivo + ' (o pedido ficou salvo em ' + p.pasta + ')');
+    }
+    mensagem('ok', `Pedido salvo em ${p.pasta}. Agora é só avisar o Claude: "novo pedido ${cliente.toUpperCase()}".`);
+    $('#f').reset(); document.querySelectorAll('.anexo ul').forEach(u => u.textContent = '');
+    document.querySelectorAll('.swatches button').forEach(b => b.setAttribute('aria-pressed', 'false'));
+    Object.keys(cores).forEach(k => cores[k] = ''); $('#sobre-modelo').textContent = '';
+  } catch (err) {
+    mensagem('erro', 'Não enviou: ' + err.message);
+  } finally { botao.disabled = false; }
+});
+
+carregarModelos();
+</script>
+</body>
+</html>
