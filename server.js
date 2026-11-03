@@ -14,7 +14,7 @@ const https = require('https');
 const fs    = require('fs');
 const path  = require('path');
 const net   = require('net');
-const { spawn } = require('child_process');
+const { spawn, execFileSync } = require('child_process');
 
 const ROOT = __dirname;
 
@@ -270,12 +270,29 @@ const pidDePe = (pid) => {
   try { process.kill(pid, 0); return true; } catch (e) { return e.code === 'EPERM'; }
 };
 
+/** quem está escutando nesta porta? No Windows, o cmd que subiu o sistema pode
+    morrer com o escritório enquanto o sistema segue de pé. O filtro é pela forma
+    da linha do netstat porque o nome do estado muda com o idioma do Windows. */
+function pidDaPorta(porta) {
+  if (process.platform !== 'win32' || !porta) return null;
+  try {
+    const saida = execFileSync('netstat', ['-ano', '-p', 'TCP'], { encoding: 'utf8', windowsHide: true });
+    const m = saida.match(new RegExp(`TCP\\s+\\S+:${porta}\\s+\\S+:0\\s+\\S+\\s+(\\d+)`));
+    return m ? Number(m[1]) : null;
+  } catch (e) { return null; }
+}
+
 function readotarVivos() {
   let d = {};
   try { d = JSON.parse(fs.readFileSync(VIVOS_ARQ, 'utf8')); } catch (e) { return; }
+  const registro = lerRegistro();
   let n = 0;
   for (const [id, p] of Object.entries(d)) {
-    if (!p || !p.pid || !pidDePe(p.pid)) continue;
+    if (!p || !p.pid) continue;
+    // só quem está neste arquivo foi subido pelo escritório: quem nasceu fora
+    // dele nunca é adotado aqui, e o Desligar continua sem poder derrubá-lo
+    if (!pidDePe(p.pid)) p.pid = pidDaPorta(registro[id] && registro[id].porta);
+    if (!p.pid) continue;
     vivos.set(id, { pid: p.pid, desde: p.desde || Date.now(),
                     arquivo: p.arquivo || path.join(LOGS, id + '.log'), erro: null });
     n++;
@@ -364,12 +381,16 @@ async function ligarDeFato(id) {
      morreu e com que código), não a saída do processo. Ficar de pé valeu mais
      que o log: para ver a saída de um sistema, rode o comando dele no
      terminal, que aí ela aparece normalmente. */
+  /* detached no Windows tira o console do cmd.exe, e aí o node que ele chama
+     abre um console novo e VISÍVEL na tela. Sem detached, o windowsHide dá ao
+     cmd um console escondido que o sistema herda, e ele continua vivo se o
+     escritório reiniciar. */
   const win = process.platform === 'win32';
   const child = spawn(s.comando, s.args || [], {
     cwd: s.pasta,
     shell: win,
     env: Object.assign({}, process.env, s.env || {}),
-    detached: true,
+    detached: !win,
     windowsHide: true,
     stdio: win ? 'ignore' : ['ignore', fd, fd]
   });

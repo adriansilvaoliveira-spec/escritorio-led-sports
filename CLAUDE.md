@@ -13,5 +13,7 @@ mensagem em português dizendo o que mudou, e `git push`. Não deixe mudança s�
   versionar segredos.
 - `agente-desenho/`: formulário do funcionário Desenho (porta 4402). Grava cada pedido
   em `ARTES\CLIENTES\<CLIENTE>` no Google Drive; dados de cliente nunca entram no git.
+- Funcionário Fichas: abre o sistema de fichas (`Desktop\sistema automação wpp\app`, porta 3210),
+  que fica fora deste repositório. O cadastro dele está em `data/sistemas.json`.
 - Ligar/desligar sem janela: `LIGAR-DESLIGAR ESCRITORIO.vbs` (atalho
   "Escritório LED SPORTS" na área de trabalho).
