@@ -90,6 +90,7 @@ function textoPedido(p) {
     `PEDIDO DE DESENHO - ${p.cliente}`,
     `Recebido em: ${p.recebido}`,
     `Origem: ${p.origem}`,
+    `Já é cliente da loja: ${p.clienteDaLoja ? 'sim' : 'não'}`,
     '',
     `Modelo: ${p.modelo}`,
     `Mockup sugerido: ${p.mockup || 'nenhum encontrado no Drive - perguntar antes de seguir'}`,
@@ -139,6 +140,7 @@ function criarPedido(b) {
     pasta,
     dados: {
       cliente, modelo, mockup: conhecido.mockup, cores,
+      clienteDaLoja: b.clienteDaLoja === true,
       observacoes: String(b.observacoes || '').slice(0, 5000),
       origem: 'escritório', recebido: new Date().toLocaleString('pt-BR'),
       anexos: { desenho: [], logo: [], patrocinio: [] }

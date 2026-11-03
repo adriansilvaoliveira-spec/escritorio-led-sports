@@ -32,6 +32,8 @@
   #msg { margin-top:12px; overflow-wrap:anywhere; }
   #msg.erro { color:var(--erro); }
   #msg.ok { color:var(--ok); }
+  .marcar { display:flex; align-items:center; gap:8px; color:var(--texto); font-size:14px; margin:0; cursor:pointer; }
+  .marcar input { accent-color:var(--acento); }
   code { background:var(--fundo); padding:2px 5px; border-radius:5px; color:var(--texto); }
 </style>
 </head>
@@ -46,6 +48,9 @@
       <div class="campo">
         <label for="cliente">Nome do cliente ou time</label>
         <input type="text" id="cliente" maxlength="80" autocomplete="off" required>
+      </div>
+      <div class="campo">
+        <label class="marcar"><input type="checkbox" id="daloja"> Já é cliente da loja</label>
       </div>
       <div class="campo">
         <label for="modelo">Modelo</label>
@@ -148,7 +153,7 @@ $('#f').addEventListener('submit', async e => {
   try {
     mensagem('', 'Criando a pasta do cliente...');
     const p = await (await fetch('/api/pedido', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cliente, modelo, cores: Object.assign({ outras: $('#outras').value }, cores), observacoes: $('#obs').value }) })).json();
+      body: JSON.stringify({ cliente, modelo, cores: Object.assign({ outras: $('#outras').value }, cores), observacoes: $('#obs').value, clienteDaLoja: $('#daloja').checked }) })).json();
     if (!p.ok) throw new Error(p.motivo);
 
     const arquivos = [];
