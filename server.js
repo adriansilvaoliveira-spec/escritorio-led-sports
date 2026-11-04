@@ -534,14 +534,7 @@ const conversas = new Map();   // id -> { sessionId, historico, rodando, proc, e
    Node escapar os argumentos. Com shell:true no Windows eles são só
    concatenados: a pergunta quebrava no primeiro espaço e qualquer & ou |
    digitado na caixa de texto viraria comando na máquina. */
-const CLAUDE_BIN = (() => {
-  const tentativas = [
-    path.join(process.env.USERPROFILE || process.env.HOME || '', '.local', 'bin', 'claude.exe'),
-    path.join(process.env.USERPROFILE || process.env.HOME || '', '.local', 'bin', 'claude')
-  ];
-  for (const t of tentativas) { if (t && fs.existsSync(t)) return t; }
-  return process.platform === 'win32' ? 'claude.exe' : 'claude';   // deixa o PATH resolver
-})();
+const CLAUDE_BIN = require('./claude-bin').acharClaude();
 const LIMITE_CONVERSA = 6 * 60 * 1000;
 
 /* a reunião diária dos agentes — ver reuniao.js */

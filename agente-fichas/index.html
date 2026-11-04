@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fichas</title>
+<style>
+  :root { --fundo:#0d1120; --caixa:#151a2e; --linha:#2a3150; --texto:#e9edf8; --fraco:#98a2c0; --acento:#8b6cff; --erro:#ff7a6b; }
+  * { box-sizing:border-box; }
+  html, body { height:100%; }
+  body { margin:0; background:var(--fundo); color:var(--texto); font:15px/1.45 system-ui,"Segoe UI",sans-serif; display:flex; flex-direction:column; }
+  button, input, select, textarea { font:inherit; color:inherit; }
+  :focus-visible { outline:2px solid var(--acento); outline-offset:1px; }
+  header { display:flex; flex-wrap:wrap; gap:8px; padding:12px 16px; border-bottom:1px solid var(--linha); align-items:center; }
+  header select { flex:1 1 180px; min-width:0; background:var(--caixa); border:1px solid var(--linha); border-radius:8px; padding:9px; }
+  #novo { display:flex; flex:1 1 240px; gap:8px; min-width:0; }
+  #novo input { flex:1; min-width:0; background:var(--caixa); border:1px solid var(--linha); border-radius:8px; padding:9px; }
+  .botao { background:var(--acento); color:#fff; border:0; border-radius:8px; padding:9px 14px; font-weight:600; cursor:pointer; white-space:nowrap; }
+  .botao:disabled { opacity:.55; cursor:default; }
+  .claro { background:transparent; border:1px solid var(--linha); color:var(--texto); }
+  #linhas { flex:1; overflow:auto; padding:16px; display:flex; flex-direction:column; gap:10px; }
+  .msg { max-width:min(720px,92%); padding:10px 13px; border-radius:12px; white-space:pre-wrap; overflow-wrap:anywhere; }
+  .voce { align-self:flex-end; background:#2c2560; }
+  .agente { align-self:flex-start; background:var(--caixa); border:1px solid var(--linha); }
+  .sistema { align-self:center; color:var(--fraco); font-size:13px; text-align:center; }
+  .sistema.alerta { color:var(--erro); }
+  .anexos-msg { display:block; margin-top:6px; font-size:13px; color:#c7c0f5; }
+  form { border-top:1px solid var(--linha); padding:10px 16px 14px; }
+  form.arrastando { outline:2px dashed var(--acento); outline-offset:-4px; }
+  #escolhidos { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; }
+  #escolhidos:empty { display:none; }
+  .chip { display:flex; align-items:center; gap:6px; background:var(--caixa); border:1px solid var(--linha); border-radius:8px; padding:4px 6px 4px 9px; font-size:13px; max-width:100%; }
+  .chip span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .chip button { background:none; border:0; cursor:pointer; color:var(--fraco); padding:2px 5px; }
+  .compor { display:flex; gap:8px; align-items:flex-end; }
+  textarea { flex:1; min-width:0; resize:none; background:var(--caixa); border:1px solid var(--linha); border-radius:10px; padding:10px; min-height:44px; max-height:180px; }
+  .dica { color:var(--fraco); font-size:12px; margin:6px 0 0; }
+</style>
+</head>
+<body>
+<header>
+  <select id="conversa" aria-label="Conversa do cliente"></select>
+  <div id="novo">
+    <input id="cliente" maxlength="80" placeholder="Nome do cliente novo" aria-label="Nome do cliente novo" autocomplete="off">
+    <button class="botao claro" id="criar" type="button">Nova conversa</button>
+  </div>
+</header>
+
+<div id="linhas" role="log" aria-live="polite"></div>
+
+<form id="f">
+  <div id="escolhidos"></div>
+  <div class="compor">
+    <input type="file" id="arquivos" multiple hidden>
+    <button class="botao claro" id="anexar" type="button">Anexar</button>
+    <textarea id="texto" rows="1" placeholder="Mande a lista, as imagens e o que precisa" aria-label="Mensagem"></textarea>
+    <button class="botao" id="enviar" type="submit">Enviar</button>
+  </div>
+  <p class="dica">Pode colar imagens com Ctrl+V ou arrastar arquivos para cá. Enter envia; Shift+Enter pula linha.</p>
+</form>
+
+<script>
+const $ = s => document.querySelector(s);
+let atual = null, escolhidos = [], ultimaAssinatura = '', login = null, enviando = false;
+
+const api = async (url, op) => {
+  const r = await fetch(url, op);
+  return r.json();
+};
+
+function aviso(texto, alerta) {
+  const d = document.createElement('div');
+  d.className = 'msg sistema' + (alerta ? ' alerta' : '');
+  d.textContent = texto;
+  $('#linhas').appendChild(d);
+  $('#linhas').scrollTop = $('#linhas').scrollHeight;
+}
+
+async function carregarLista(selecionar) {
+  const { conversas } = await api('/api/conversas');
+  const sel = $('#conversa');
+  sel.textContent = '';
+  sel.add(new Option(conversas.length ? 'Escolha o cliente' : 'Nenhuma conversa ainda', ''));
+  for (const c of conversas) sel.add(new Option(c.cliente, c.id));
+  sel.value = selecionar || atual || '';
+}
+
+function pintar(c) {
+  const lin = $('#linhas');
+  const assinatura = c.estado + '|' + c.historico.length;
+  const pensando = c.estado !== 'parada';
+  $('#enviar').disabled = pensando || enviando;
+  if (assinatura === ultimaAssinatura) return;
+  ultimaAssinatura = assinatura;
+  lin.textContent = '';
+  if (!c.historico.length) aviso(`Conversa de ${c.cliente}. Mande as imagens e as informações do pedido.`);
+  for (const m of c.historico) {
+    const d = document.createElement('div');
+    d.className = 'msg ' + m.quem;
+    d.textContent = m.texto;
+    if (m.anexos && m.anexos.length) {
+      const a = document.createElement('span');
+      a.className = 'anexos-msg';
+      a.textContent = 'Anexos: ' + m.anexos.join(', ');
+      d.appendChild(a);
+    }
+    lin.appendChild(d);
+  }
+  if (pensando) aviso(c.estado === 'na fila' ? 'Na fila: ele termina outro pedido e já vem.' : 'Trabalhando... pode levar alguns minutos.');
+  lin.scrollTop = lin.scrollHeight;
+}
+
+async function atualizar() {
+  if (!atual) return;
+  try { pintar(await api('/api/conversas/' + atual)); } catch (e) { /* servidor voltando */ }
+}
+
+async function checarLogin() {
+  try { login = await api('/api/login'); } catch (e) { return; }
+  const faltando = !login.conectado;
+  if (faltando && !atual) {
+    $('#linhas').textContent = '';
+    aviso(login.instalado ? 'O Claude ainda não está conectado neste computador. Faça o login uma vez para começar.' : 'Não encontrei o Claude neste computador.', true);
+  } else if (!atual) {
+    $('#linhas').textContent = '';
+    aviso('Escolha um cliente ou abra uma conversa nova. Cada cliente tem a própria conversa.');
+  }
+}
+
+$('#conversa').addEventListener('change', e => {
+  atual = e.target.value || null; ultimaAssinatura = '';
+  if (atual) atualizar(); else checarLogin();
+});
+
+async function criar() {
+  const nome = $('#cliente').value.trim();
+  if (!nome) return $('#cliente').focus();
+  const r = await api('/api/conversas', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cliente: nome }) });
+  if (!r.ok) return aviso(r.motivo, true);
+  $('#cliente').value = '';
+  atual = r.conversa.id; ultimaAssinatura = '';
+  await carregarLista(atual);
+  atualizar();
+  $('#texto').focus();
+}
+$('#criar').addEventListener('click', criar);
+$('#cliente').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); criar(); } });
+
+function pintarEscolhidos() {
+  const box = $('#escolhidos');
+  box.textContent = '';
+  escolhidos.forEach((f, i) => {
+    const chip = document.createElement('div'), nome = document.createElement('span'), tirar = document.createElement('button');
+    chip.className = 'chip'; nome.textContent = f.name; tirar.type = 'button'; tirar.textContent = '×';
+    tirar.setAttribute('aria-label', 'Tirar ' + f.name);
+    tirar.addEventListener('click', () => { escolhidos.splice(i, 1); pintarEscolhidos(); });
+    chip.append(nome, tirar); box.appendChild(chip);
+  });
+}
+const adicionar = lista => { for (const f of lista) escolhidos.push(f); pintarEscolhidos(); };
+
+$('#anexar').addEventListener('click', () => $('#arquivos').click());
+$('#arquivos').addEventListener('change', e => { adicionar(e.target.files); e.target.value = ''; });
+
+// print colado vem sem nome útil: dá um para não sobrescrever nem confundir
+document.addEventListener('paste', e => {
+  const fotos = [...e.clipboardData.files];
+  if (!fotos.length) return;
+  e.preventDefault();
+  adicionar(fotos.map((f, i) => new File([f], f.name && f.name !== 'image.png' ? f.name : `imagem colada ${Date.now()}-${i}.png`, { type: f.type })));
+});
+const form = $('#f');
+for (const ev of ['dragenter', 'dragover']) document.addEventListener(ev, e => { e.preventDefault(); form.classList.add('arrastando'); });
+for (const ev of ['dragleave', 'drop']) document.addEventListener(ev, e => { e.preventDefault(); form.classList.remove('arrastando'); });
+document.addEventListener('drop', e => adicionar(e.dataTransfer.files));
+
+const texto = $('#texto');
+texto.addEventListener('input', () => { texto.style.height = 'auto'; texto.style.height = texto.scrollHeight + 'px'; });
+texto.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } });
+
+form.addEventListener('submit', async e => {
+  e.preventDefault();
+  if (!atual) { $('#cliente').focus(); return aviso('Primeiro escolha o cliente ou abra uma conversa nova.', true); }
+  const msg = texto.value.trim();
+  if (!msg && !escolhidos.length) return;
+  enviando = true; $('#enviar').disabled = true;
+  try {
+    const nomes = [];
+    for (const f of escolhidos) {
+      aviso('Enviando ' + f.name + '...');
+      const r = await api(`/api/conversas/${atual}/anexo?nome=${encodeURIComponent(f.name)}`, { method: 'PUT', body: f });
+      if (!r.ok) throw new Error(r.motivo);
+      nomes.push(r.nome);
+    }
+    const r = await api(`/api/conversas/${atual}/mensagem`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ texto: msg, anexos: nomes }) });
+    if (!r.ok) throw new Error(r.motivo);
+    texto.value = ''; texto.style.height = 'auto'; escolhidos = []; pintarEscolhidos();
+    ultimaAssinatura = '';
+  } catch (err) {
+    aviso('Não enviou: ' + err.message, true);
+  } finally {
+    enviando = false;
+    atualizar();
+  }
+});
+
+carregarLista().then(checarLogin);
+setInterval(atualizar, 2500);
+setInterval(() => { if (!atual) checarLogin(); }, 15000);
+</script>
+</body>
+</html>
