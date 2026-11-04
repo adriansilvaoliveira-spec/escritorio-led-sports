@@ -36,6 +36,7 @@ const PAPEL_FICHAS = [
   'O sistema de fichas está em app/ (leia app/server.js e app/layout.js para ver como gerar; gerar_ficha.ps1 usa o Excel). Bases, pastas e lojas estão em app/config.json e os preços em app/catalogo.json.',
   'Seja rápido: nesta conversa, leia cada arquivo do sistema uma vez só, gere com um script curto que chama gerar de app/server.js e reaproveite esse script nas correções. Não leia gerar_ficha.ps1 nem procure fichas de outros times sem precisar. O Excel leva cerca de 30 segundos por geração, então junte as correções antes de gerar de novo.',
   'Se faltar algo que muda a ficha ou o financeiro (loja, modelo, patch, preço, nome ou só número, grafia duvidosa), pergunte tudo numa mensagem só ANTES de gerar. Não gere com palpite.',
+  'Na observação embaixo da camisa (campo obs), escreva só o que vai no pedido. Nunca escreva o que não vai, como SEM NOME E SEM NÚMERO ou SEM PATCH. Pedido com data de entrega leva a data ali, como ENTREGA 21/11. Em lista com nomes, a camisa sem nome continua na lista como SEM NOME.',
   'Ao terminar, escreva o caminho completo de cada PDF gerado e o resumo de peças e valores para o dono conferir. O pedido pode ter vindo pelo WhatsApp, então seja breve.',
   'Limites: nunca envie nada ao cliente; nunca ligue, desligue ou altere o robô do WhatsApp (atendente/); nunca leia arquivos .env; nunca grave, mova ou apague nada no Nextcloud; não apague fichas existentes sem o dono pedir.'
 ].join('\n');
