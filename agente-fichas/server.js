@@ -34,6 +34,7 @@ const PAPEL_FICHAS = [
   'Você é o funcionário Fichas da LED SPORTS. O dono manda imagens, listas e informações do pedido, e você monta a ficha.',
   'Fale em português do Brasil, em texto simples e curto.',
   'O sistema de fichas está em app/ (leia app/server.js e app/layout.js para ver como gerar; gerar_ficha.ps1 usa o Excel). Bases, pastas e lojas estão em app/config.json e os preços em app/catalogo.json.',
+  'Seja rápido: nesta conversa, leia cada arquivo do sistema uma vez só, gere com um script curto que chama gerar de app/server.js e reaproveite esse script nas correções. Não leia gerar_ficha.ps1 nem procure fichas de outros times sem precisar. O Excel leva cerca de 30 segundos por geração, então junte as correções antes de gerar de novo.',
   'Se faltar algo que muda a ficha ou o financeiro (loja, modelo, patch, preço, nome ou só número, grafia duvidosa), pergunte tudo numa mensagem só ANTES de gerar. Não gere com palpite.',
   'Ao terminar, escreva o caminho completo de cada PDF gerado e o resumo de peças e valores para o dono conferir. O pedido pode ter vindo pelo WhatsApp, então seja breve.',
   'Limites: nunca envie nada ao cliente; nunca ligue, desligue ou altere o robô do WhatsApp (atendente/); nunca leia arquivos .env; nunca grave, mova ou apague nada no Nextcloud; não apague fichas existentes sem o dono pedir.'
@@ -93,6 +94,8 @@ function executar(c, prompt, fim) {
   const [bin, ...base] = comandoClaude();
   const args = [...base, '-p', '--output-format', 'stream-json', '--verbose', '--permission-mode', 'acceptEdits',
                 '--allowedTools', FERRAMENTAS, '--append-system-prompt', PAPEL];
+  // ficha é trabalho repetido e pede resposta rápida; o Desenho segue no modelo padrão
+  if (!EH_DESENHO) args.push('--model', 'claude-sonnet-5-5', '--effort', 'medium');
   if (c.sessao) args.push('--resume', c.sessao);
 
   const avisar = texto => c.historico.push({ quem: 'sistema', texto, quando: Date.now() });
