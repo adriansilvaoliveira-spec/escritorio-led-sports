@@ -204,7 +204,13 @@ form.addEventListener('submit', async e => {
   }
 });
 
-carregarLista().then(checarLogin);
+// o formulário do Desenho abre aqui direto na conversa daquele cliente: #id
+function abrirDoEndereco() {
+  atual = location.hash.slice(1) || null; ultimaAssinatura = '';
+  carregarLista().then(() => { if (atual) atualizar(); else checarLogin(); });
+}
+window.addEventListener('hashchange', abrirDoEndereco);
+abrirDoEndereco();
 setInterval(atualizar, 2500);
 setInterval(() => { if (!atual) checarLogin(); }, 15000);
 </script>

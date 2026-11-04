@@ -7,8 +7,9 @@
      ARTES\CLIENTES\<CLIENTE>\PEDIDO <data hora>\
        PEDIDO.txt, pedido.json, DESENHO\, LOGO\, PATROCINIO\
 
-   Só grava pedido e anexos. O molde e o mockup são feitos depois,
-   na conversa daquele cliente. Sem dependências: só Node.js.
+   Também recebe alteração de arte pronta: copia o arquivo informado
+   e nunca mexe no original. O molde e o mockup são feitos na conversa
+   daquele cliente, para onde o pedido é entregue. Só precisa de Node.js.
    =========================================================== */
 const http = require('http');
 const fs = require('fs');
@@ -23,6 +24,12 @@ const LIMITE_JSON = 100 * 1024;
 const CACHE_MODELOS_MS = 60 * 1000;
 const PASTAS_ANEXO = { desenho: 'DESENHO', logo: 'LOGO', patrocinio: 'PATROCINIO' };
 const IGNORAR_MOLDE = /TESTE|C[óo]pia_de_seguran[çc]a/i;
+const URL_CONVERSA = process.env.DESENHO_CONVERSA_URL || 'http://localhost:4404';
+const EXT_ARTE = /\.(cdr|ai|eps|psd|psb|pdf|svg|jpe?g|png)$/i;
+const EXT_EDITAVEL = /\.(cdr|ai|eps|psd|psb)$/i;
+const MAX_DA_PASTA = 6;
+const REPETIR_ENVIO_MS = 30 * 1000;
+const LIMITE_REPETIR_MS = 60 * 60 * 1000;
 
 /* a pasta do Drive pode ganhar uma subpasta DESENHO: acha em vez de presumir */
 function raiz() {
@@ -85,6 +92,7 @@ const carimbo = () => {
 };
 
 function textoPedido(p) {
+  if (p.tipo === 'alteracao') return textoAlteracao(p);
   const c = p.cores || {};
   const linhas = [
     `PEDIDO DE DESENHO - ${p.cliente}`,
@@ -151,6 +159,130 @@ function criarPedido(b) {
   return { ok: true, id, pasta };
 }
 
+/* ---------- alteração de arte pronta ---------- */
+function textoAlteracao(p) {
+  const linhas = [
+    `ALTERAÇÃO DE ARTE PRONTA - ${p.cliente}`,
+    `Recebido em: ${p.recebido}`,
+    `Origem: ${p.origem}`,
+    '',
+    'Arquivos informados (os originais não são alterados):',
+    ...p.informados.map(c => '  ' + c),
+    '',
+    'Cópias para editar, na pasta ORIGINAL:',
+    ...p.copias.map(c => '  ' + c),
+    '',
+    'O que alterar:',
+    p.observacoes,
+    '',
+    'Anexos:'
+  ];
+  for (const t of Object.keys(PASTAS_ANEXO)) {
+    const lista = (p.anexos && p.anexos[t]) || [];
+    linhas.push(`  ${PASTAS_ANEXO[t]}: ${lista.length ? lista.join(', ') : '-'}`);
+  }
+  return linhas.join('\r\n') + '\r\n';
+}
+
+/* aceita o que o "Copiar como caminho" do Windows entrega: arquivo ou pasta, com aspas */
+function arquivosDoCaminho(texto) {
+  const c = String(texto || '').trim().replace(/^["']+|["']+$/g, '');
+  if (!c) return { lista: [] };
+  if (!/^[A-Za-z]:\\/.test(c)) return { erro: `use o caminho completo, começando pela unidade (ex.: G:\\...): ${c}` };
+  let info;
+  try { info = fs.statSync(c); } catch (e) { return { erro: 'não encontrei: ' + c }; }
+  if (info.isFile()) {
+    if (!EXT_ARTE.test(c)) return { erro: 'esse tipo de arquivo não é de arte: ' + c };
+    return { lista: [c] };
+  }
+  const lista = fs.readdirSync(c, { withFileTypes: true })
+    .filter(d => d.isFile() && EXT_EDITAVEL.test(d.name) && !d.name.startsWith('~'))
+    .map(d => path.join(c, d.name));
+  if (!lista.length) return { erro: 'não achei CDR nem PSD nesta pasta: ' + c };
+  if (lista.length > MAX_DA_PASTA) return { erro: `essa pasta tem ${lista.length} arquivos de arte. Informe o arquivo certo: ${c}` };
+  return { lista };
+}
+
+async function criarAlteracao(b) {
+  const cliente = limparNome(b.cliente).toUpperCase();
+  const observacoes = String(b.observacoes || '').trim().slice(0, 5000);
+  if (!cliente) return { ok: false, motivo: 'diga o nome do cliente' };
+  if (!observacoes) return { ok: false, motivo: 'diga o que precisa alterar' };
+  const informados = [];
+  for (const campo of [b.molde, b.mockup]) {
+    const r = arquivosDoCaminho(campo);
+    if (r.erro) return { ok: false, motivo: r.erro };
+    for (const c of r.lista) if (!informados.includes(c)) informados.push(c);
+  }
+  if (!informados.length) return { ok: false, motivo: 'informe onde está o molde ou o mockup' };
+
+  const pastaCliente = path.join(raiz(), 'ARTES', 'CLIENTES', cliente);
+  let pasta = path.join(pastaCliente, 'ALTERACAO ' + carimbo());
+  for (let n = 2; fs.existsSync(pasta); n++) pasta = path.join(pastaCliente, `ALTERACAO ${carimbo()} (${n})`);
+  const original = path.join(pasta, 'ORIGINAL');
+  fs.mkdirSync(original, { recursive: true });
+
+  // só lê o arquivo de origem: vale também para a pasta de produção, que é só para ver
+  const copias = [];
+  for (const c of informados) {
+    const destino = path.join(original, nomeLivre(original, path.basename(c)));
+    await fs.promises.copyFile(c, destino, fs.constants.COPYFILE_EXCL);
+    copias.push(destino);
+  }
+  const id = crypto.randomUUID();
+  const reg = {
+    pasta,
+    dados: {
+      tipo: 'alteracao', cliente, informados, copias, observacoes,
+      origem: 'escritório', recebido: new Date().toLocaleString('pt-BR'),
+      anexos: { desenho: [], logo: [], patrocinio: [] }
+    }
+  };
+  pedidos.set(id, reg);
+  gravarPedido(reg);
+  return { ok: true, id, pasta };
+}
+
+/* ---------- entrega o pedido à conversa do cliente no funcionário Desenho ---------- */
+function mensagemParaDesenho(reg) {
+  const pedido = path.join(reg.pasta, 'PEDIDO.txt');
+  if (reg.dados.tipo === 'alteracao') {
+    return [
+      `ALTERAÇÃO de arte pronta, pedida pelo escritório. Leia ${pedido} e os anexos em ${reg.pasta}.`,
+      `Edite só as cópias da pasta ORIGINAL, e salve o resultado em ${reg.pasta}. Nunca mexa nos arquivos de origem.`,
+      'Mude apenas o que foi pedido e mantenha todo o resto igual. Se veio molde, altere o molde primeiro, exporte a prévia, escreva o caminho completo dela e espere a aprovação antes de atualizar o mockup. Se veio só o mockup, altere e mostre a prévia do mesmo jeito.'
+    ].join('\n');
+  }
+  return `Novo pedido de desenho, feito pelo escritório. Leia ${pedido} e os anexos em ${reg.pasta}, e siga o fluxo: molde, prévia com o caminho completo, e espere a aprovação antes do mockup.`;
+}
+
+async function postarConversa(rota, corpo) {
+  const r = await fetch(URL_CONVERSA + rota, { method: 'POST', body: JSON.stringify(corpo) });
+  return r.json();
+}
+
+async function entregar(reg) {
+  try {
+    const c = await postarConversa('/api/conversas', { cliente: reg.dados.cliente });
+    if (!c.ok) return { enviado: false, motivo: c.motivo };
+    const texto = mensagemParaDesenho(reg);
+    const r = await postarConversa(`/api/conversas/${c.conversa.id}/mensagem`, { texto });
+    if (r.ok) return { enviado: true, conversa: c.conversa.id };
+    // já trabalhando nesse cliente: entrega assim que ele terminar
+    const inicio = Date.now();
+    const repetir = setInterval(async () => {
+      if (Date.now() - inicio > LIMITE_REPETIR_MS) return clearInterval(repetir);
+      try {
+        const de = await postarConversa(`/api/conversas/${c.conversa.id}/mensagem`, { texto });
+        if (de.ok) clearInterval(repetir);
+      } catch (e) { /* tenta de novo na próxima */ }
+    }, REPETIR_ENVIO_MS);
+    return { enviado: true, conversa: c.conversa.id, naFila: true };
+  } catch (e) {
+    return { enviado: false, motivo: 'o funcionário Desenho está desligado' };
+  }
+}
+
 function nomeLivre(pasta, nome) {
   const { name, ext } = path.parse(nome);
   let final = nome;
@@ -214,6 +346,22 @@ const servidor = http.createServer((req, res) => {
       catch (e) { json(res, 500, { ok: false, motivo: e.message }); }
     });
     return;
+  }
+  if (rota === '/api/alteracao' && req.method === 'POST') {
+    let bruto = '';
+    req.on('data', c => { bruto += c; if (bruto.length > LIMITE_JSON) req.destroy(); });
+    req.on('end', () => {
+      let b;
+      try { b = JSON.parse(bruto || '{}'); } catch (e) { return json(res, 400, { ok: false, motivo: 'pedido inválido' }); }
+      criarAlteracao(b).then(r => json(res, 200, r)).catch(e => json(res, 500, { ok: false, motivo: e.message }));
+    });
+    return;
+  }
+  const mf = rota.match(/^\/api\/pedido\/([0-9a-f-]+)\/fim$/);
+  if (mf && req.method === 'POST') {
+    const reg = pedidos.get(mf[1]);
+    if (!reg) return json(res, 404, { ok: false, motivo: 'pedido não encontrado' });
+    return void entregar(reg).then(r => json(res, 200, { ok: true, ...r }));
   }
   const m = rota.match(/^\/api\/pedido\/([0-9a-f-]+)\/arquivo$/);
   if (m && req.method === 'PUT') {

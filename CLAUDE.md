@@ -11,9 +11,10 @@ mensagem em português dizendo o que mudou, e `git push`. Não deixe mudança s�
 - `data/*.json` (exceto os `*.exemplo.json`) fica fora do git de propósito: tem
   configuração, equipe e a chave do CallMeBot. O repositório é público — nunca
   versionar segredos.
-- `agente-desenho/`: formulário do funcionário Desenho (porta 4402). Grava cada pedido
-  em `ARTES\CLIENTES\<CLIENTE>` no Google Drive; dados de cliente nunca entram no git.
-- Funcionário Fichas: abre o sistema de fichas (`Desktop\sistema automação wpp\app`, porta 3210),
-  que fica fora deste repositório. O cadastro dele está em `data/sistemas.json`.
+- `agente-desenho/`: formulário do funcionário Desenho (porta 4402), com novo desenho e alteração de
+  arte pronta. Grava em `DESENHO\ARTES\CLIENTES\<CLIENTE>` no Google Drive e entrega à conversa do
+  cliente; dados de cliente nunca entram no git.
+- `agente-fichas/`: conversa por cliente, com anexos, dos funcionários Fichas (porta 4403) e Desenho
+  (`AGENTE=desenho`, porta 4404). O cadastro deles está em `data/sistemas.json`.
 - Ligar/desligar sem janela: `LIGAR-DESLIGAR ESCRITORIO.vbs` (atalho
   "Escritório LED SPORTS" na área de trabalho).
