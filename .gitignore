@@ -7,4 +7,4 @@ data/*.json
 data/logs/
 data/reunioes/
 
-agente-fichas/dados/
+agente-fichas/dados*/
