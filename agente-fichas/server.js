@@ -90,12 +90,12 @@ function proximo() {
 
 function executar(c, prompt, fim) {
   const [bin, ...base] = comandoClaude();
-  const args = [...base, '-p', '--output-format', 'json', '--permission-mode', 'acceptEdits',
+  const args = [...base, '-p', '--output-format', 'stream-json', '--verbose', '--permission-mode', 'acceptEdits',
                 '--allowedTools', FERRAMENTAS, '--append-system-prompt', PAPEL];
   if (c.sessao) args.push('--resume', c.sessao);
 
   const avisar = texto => c.historico.push({ quem: 'sistema', texto, quando: Date.now() });
-  let saida = '', erros = '', feito = false;
+  let saida = '', erros = '', feito = false, resultado = null;
   const concluir = () => { if (feito) return false; feito = true; c.estado = 'parada'; return true; };
 
   // sem shell: o texto vai pela entrada padrão e nunca vira comando
@@ -107,24 +107,42 @@ function executar(c, prompt, fim) {
 
   proc.stdin.on('error', () => { /* caiu antes de ler */ });
   proc.stdin.end(prompt, 'utf8');
-  proc.stdout.on('data', d => { saida += d; });
+  /* O claude pode terminar a resposta e o processo seguir aberto, preso a um
+     terminal auxiliar. Por isso o fim vale pela linha "result" da saída, e não
+     por o processo fechar: sem isso, a resposta nunca chega ao dono. */
+  proc.stdout.on('data', d => {
+    saida += d;
+    let fimLinha;
+    while ((fimLinha = saida.indexOf('\n')) >= 0) {
+      const linha = saida.slice(0, fimLinha).trim();
+      saida = saida.slice(fimLinha + 1);
+      let o = null;
+      try { o = JSON.parse(linha); } catch (e) { continue; }
+      if (o && o.type === 'result') { resultado = o; encerrar(); }
+    }
+  });
   proc.stderr.on('data', d => { erros += d; });
   proc.on('error', e => {
     clearTimeout(prazo);
     if (concluir()) { avisar('Não consegui abrir o Claude: ' + e.message); fim(); }
   });
-  proc.on('close', () => {
+  proc.on('close', () => encerrar());
+
+  function encerrar() {
     clearTimeout(prazo);
     if (!concluir()) return;
-    let j = null;
-    try { j = JSON.parse(saida); } catch (e) { /* não veio JSON */ }
+    // o que ficou preso a ele não serve mais: libera a fila e o processo
+    if (resultado && proc.exitCode === null) {
+      spawn('taskkill', ['/pid', String(proc.pid), '/t', '/f'], { stdio: 'ignore', windowsHide: true }).on('error', () => {});
+    }
+    const j = resultado;
     const texto = j ? String(j.result || '') : (erros || saida).trim();
     if (j && j.session_id && !/not logged in|\/login/i.test(texto)) c.sessao = j.session_id;
     if (/not logged in|please run \/login/i.test(texto)) avisar('O Claude não está conectado neste computador. Faça o login uma vez e mande de novo.');
     else if (texto) c.historico.push({ quem: 'agente', texto, quando: Date.now(), erro: !!(j && j.is_error) });
     else avisar('Ele terminou sem responder. Mande de novo.');
     fim();
-  });
+  }
 }
 
 function criarConversa(b) {
