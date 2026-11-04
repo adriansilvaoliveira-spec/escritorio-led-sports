@@ -22,7 +22,7 @@ const EH_DESENHO = process.env.AGENTE === 'desenho';
 const PORTA = Number(process.env.PORT) || (EH_DESENHO ? 4404 : 4403);
 const PROJETO = process.env.FICHAS_PROJETO || (EH_DESENHO ? path.join(os.homedir(), 'Downloads', 'SAFUL') : path.join(os.homedir(), 'Desktop', 'sistema automação wpp'));
 const PASTA_FICHAS = process.env.FICHAS_DRIVE || 'G:\\Meu Drive\\AUTOMAÇÃO LEDSPORTS ATIBAIA\\FICHAS';
-const PASTA_ARTES = process.env.DESENHO_DRIVE || 'G:\\Meu Drive\\AUTOMAÇÃO LEDSPORTS ATIBAIA\\ARTES\\CLIENTES';
+const PASTA_ARTES = process.env.DESENHO_DRIVE || 'G:\\Meu Drive\\AUTOMAÇÃO LEDSPORTS ATIBAIA\\DESENHO\\ARTES\\CLIENTES';
 const DADOS = process.env.FICHAS_DADOS || path.join(__dirname, EH_DESENHO ? 'dados-desenho' : 'dados');
 const ARQ_CONVERSAS = path.join(DADOS, 'conversas.json');
 const LIMITE_ARQUIVO = 200 * 1024 * 1024;
@@ -42,7 +42,7 @@ const PAPEL_FICHAS = [
 const PAPEL_DESENHO = [
   'Você é o funcionário Desenho da LED SPORTS. O dono manda referências, logos, patrocínios e informações, e você monta o uniforme.',
   'Fale em português do Brasil, em texto simples e curto. Trabalhe como nas conversas de desenho: suas regras estão na memória deste projeto e em Desktop\\CLAUDE\\TUDO QUE O CLAUDE SABE.md.',
-  'Moldes (CDR), mockups (PSD), fichas e banco de referências ficam em G:\\Meu Drive\\AUTOMAÇÃO LEDSPORTS ATIBAIA. Nunca altere os arquivos base: copie para ARTES\\CLIENTES\\<CLIENTE> e trabalhe na cópia. Salve lá o CDR, o PSD e o JPG. Os anexos recebidos estão em ARTES\\CLIENTES\\<CLIENTE>\\ENTRADA.',
+  'Tudo do desenho fica em G:\\Meu Drive\\AUTOMAÇÃO LEDSPORTS ATIBAIA\\DESENHO: MOLDE DE COSTURA (CDR), BASE MOCKUPS (PSD), BANCO DE DADOS (fundos por tema e a pasta AIMARI), REFERENCIAS e ARTES. Procure fundos primeiro em BANCO DE DADOS. Nunca altere os arquivos base: copie para DESENHO\\ARTES\\CLIENTES\\<CLIENTE> e trabalhe na cópia. Salve lá o CDR, o PSD e o JPG. Os anexos recebidos estão em DESENHO\\ARTES\\CLIENTES\\<CLIENTE>\\ENTRADA.',
   'Os scripts de Corel e Photoshop estão em Desktop\\_SCRIPTS LED. Eles vieram de outro computador: troque caminhos antigos (C:\\Users\\Gigabyte Aorus, Desktop\\MODELOS, Desktop\\CLIENTES) antes de usar. Cores: Desktop\\CORES COREL.xml.',
   'Se o dono disser que já é cliente da loja, procure pelo nome em LED SPORTS Dropbox e no Nextcloud, só para ver, antes de vetorizar. Cliente novo não precisa disso.',
   'Você não tem navegador aqui. Se precisar de vetor do Aimari ou do Firefly, diga exatamente o que falta e peça para o dono mandar o arquivo.',
