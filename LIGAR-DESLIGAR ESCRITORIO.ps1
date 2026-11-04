@@ -30,5 +30,8 @@ $cmd = 'cmd /c "' + (Join-Path $pasta 'INICIAR ESCRITORIO.cmd') + '"'
 ([wmiclass]'Win32_Process').Create($cmd, $pasta, $si) | Out-Null
 for ($i = 0; $i -lt 40 -and -not (NoAr); $i++) { Start-Sleep -Milliseconds 750 }
 
-if (NoAr) { Start-Process $url }
+if (NoAr) {
+  # abre no Chrome; só usa o navegador padrão se ele não estiver instalado
+  try { Start-Process chrome $url -ErrorAction Stop } catch { Start-Process $url }
+}
 else { $wsh.Popup('O escritório não respondeu em 30s.', 0, 'LED SPORTS ATIBAIA', 48) | Out-Null }
