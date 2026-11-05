@@ -2,6 +2,9 @@
 # nenhuma janela de cmd e abre o navegador; se estiver ligado, desliga.
 # Os sistemas dos agentes continuam de pé (o escritório reencontra cada um
 # pelo pid quando volta).
+# -SoLigar (atalho da pasta Inicializar): só liga, nunca desliga e não abre
+# o navegador, para o escritório e o vigia dos sistemas voltarem com o Windows.
+param([switch]$SoLigar)
 $pasta = Split-Path -Parent $MyInvocation.MyCommand.Path
 $url = 'http://localhost:4321'
 $porta = 4321
@@ -17,6 +20,7 @@ $servidor = Get-NetTCPConnection -LocalPort $porta -State Listen -ErrorAction Si
   Select-Object -ExpandProperty OwningProcess -Unique
 
 if ($supervisor -or $servidor) {
+  if ($SoLigar) { exit }
   # primeiro o laço do cmd, senão ele sobe o node de novo
   foreach ($p in $supervisor) { Stop-Process -Id $p.ProcessId -Force -ErrorAction SilentlyContinue }
   foreach ($id in $servidor) { Stop-Process -Id $id -Force -ErrorAction SilentlyContinue }
@@ -30,6 +34,7 @@ $cmd = 'cmd /c "' + (Join-Path $pasta 'INICIAR ESCRITORIO.cmd') + '"'
 ([wmiclass]'Win32_Process').Create($cmd, $pasta, $si) | Out-Null
 for ($i = 0; $i -lt 40 -and -not (NoAr); $i++) { Start-Sleep -Milliseconds 750 }
 
+if ($SoLigar) { exit }
 if (NoAr) {
   # abre no Chrome; só usa o navegador padrão se ele não estiver instalado
   try { Start-Process chrome $url -ErrorAction Stop } catch { Start-Process $url }
