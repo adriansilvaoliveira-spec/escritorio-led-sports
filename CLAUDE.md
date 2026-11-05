@@ -17,5 +17,10 @@ mensagem em português dizendo o que mudou, e `git push`. Não deixe mudança s�
 - `agente-fichas/`: conversa por cliente, com anexos, dos funcionários Fichas (porta 4403) e Desenho
   (`AGENTE=desenho`, porta 4404). O cadastro deles está em `data/sistemas.json`. Pelo WhatsApp só o
   Fichas recebe pedido ("Ficha TIME"); desenho é feito direto no Claude.
+- Painel VENDAS do mês (parede norte da Sala de Serviço, `js/vendas.js` + `/api/vendas`): só lê
+  `config.vendas.arquivo` (neste PC, `C:\LED-atendente\app\vendas.json`, que o programa de fichas
+  e o atendente do WhatsApp gravam) e soma o mês por vendedor (FÁBIO, JUNINHO). Os agentes VENDAS
+  FABIO e VENDAS JUNINHO são tipo `web` (3300/painel e 3210): o escritório não liga nem desliga o
+  atendente, que roda à parte e só pode rodar em um computador por vez.
 - Ligar/desligar sem janela: `LIGAR-DESLIGAR ESCRITORIO.vbs` (atalho
   "Escritório LED SPORTS" na área de trabalho).

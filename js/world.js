@@ -135,6 +135,7 @@ const WORLD = (() => {
   const SIGNS = [
     { o: 'n', x: 20, y: 0,  len: 9,  kind: 'equipe'   },  // serviço: a equipe agora
     { o: 'n', x: 30, y: 0,  len: 10, kind: 'nome'     },  // nome do escritório (config)
+    { o: 'n', x: 40, y: 0,  len: 5,  kind: 'vendas'   },  // longe do canto: x 45+ é vidro  // serviço: vendas do mês por vendedor
     { o: 'n', x: 1,  y: 0,  len: 7,  kind: 'eventos'  },  // diretoria: próximos eventos
     { o: 'w', x: 0,  y: 3,  len: 8,  kind: 'quadro'   },  // diretoria: quadro branco
     { o: 'w', x: 0,  y: 24, len: 7,  kind: 'nome'     }   // lounge
@@ -393,6 +394,7 @@ const WORLD = (() => {
     else if (s.kind === 'equipe')  signEquipe(c, len, t, rgbOn);
     else if (s.kind === 'eventos') signEventos(c, len, rgbOn);
     else if (s.kind === 'quadro')  signQuadro(c, len);
+    else if (s.kind === 'vendas')  signVendas(c, len, rgbOn);
   }
 
   /* Cada placa é pintada uma vez num canvas próprio e depois só é COPIADA
@@ -510,6 +512,65 @@ const WORLD = (() => {
       c.fillText(e.tipo, x0 + w - 14, ry);
       c.textAlign = 'left';
     });
+  }
+
+  /* ---- vendas do mês por vendedor (js/vendas.js) ---- */
+  const MESES = ['JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO', 'JULHO',
+                 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'];
+  const brl = v => 'R$ ' + (Number(v) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  function signVendas(c, len, rgbOn) {
+    const d = (typeof VENDAS !== 'undefined') ? VENDAS.dados() : { vendedores: [] };
+    const x0 = 8, y0 = 12, w = len - 16, h = 84;
+    c.fillStyle = 'rgba(5,7,13,.9)';
+    ISO.rrect(c, x0, y0, w, h, 8); c.fill();
+    c.strokeStyle = 'rgba(35,224,138,.35)'; c.lineWidth = 1.4; c.stroke();
+
+    c.textBaseline = 'middle'; c.textAlign = 'left';
+    c.font = "700 11px 'Barlow Semi Condensed', sans-serif";
+    c.fillStyle = '#23e08a'; c.letterSpacing = '2px';
+    if (rgbOn) { c.shadowColor = 'rgba(35,224,138,.7)'; c.shadowBlur = 10; }
+    const m = /^\d{4}-(\d{2})$/.exec(d.mes || '');
+    c.fillText('VENDAS ' + (m ? MESES[Number(m[1]) - 1] : 'DO MÊS'), x0 + 12, y0 + 13);
+    c.shadowBlur = 0; c.letterSpacing = '0px';
+    c.strokeStyle = 'rgba(255,255,255,.09)';
+    c.beginPath(); c.moveTo(x0 + 10, y0 + 23); c.lineTo(x0 + w - 10, y0 + 23); c.stroke();
+
+    const aviso = !d.configurado ? 'configure vendas em data/config.json'
+                : d.erro ? d.erro
+                : !d.vendedores.length ? 'nenhuma ficha este mês' : '';
+    if (aviso) {
+      c.font = "600 10px 'Barlow Semi Condensed', sans-serif";
+      c.fillStyle = 'rgba(150,160,190,.6)';
+      c.fillText(aviso, x0 + 14, y0 + 42);
+      return;
+    }
+    const linhas = d.vendedores.slice(0, 3);
+    linhas.forEach((v, i) => {
+      const ry = y0 + 36 + i * 15;
+      c.textAlign = 'left';
+      c.font = "700 10px 'Barlow Semi Condensed', sans-serif";
+      c.fillStyle = '#e4e9f6';
+      c.fillText(String(v.nome).toUpperCase(), x0 + 14, ry);
+      c.font = "600 8.5px 'Barlow Semi Condensed', sans-serif";
+      c.fillStyle = 'rgba(180,190,215,.7)';
+      c.fillText(v.fichas + (v.fichas === 1 ? ' ficha' : ' fichas'), x0 + 76, ry);
+      c.textAlign = 'right';
+      c.font = "700 11px 'Barlow', sans-serif";
+      c.fillStyle = '#23e08a';
+      c.fillText(brl(v.total), x0 + w - 14, ry);
+    });
+    if (linhas.length > 1) {
+      const ry = y0 + 36 + linhas.length * 15;
+      c.textAlign = 'left';
+      c.font = "600 8.5px 'Barlow Semi Condensed', sans-serif";
+      c.fillStyle = 'rgba(180,190,215,.7)';
+      c.fillText('TOTAL', x0 + 14, ry);
+      c.textAlign = 'right';
+      c.font = "700 10px 'Barlow', sans-serif";
+      c.fillStyle = '#c4b8ff';
+      c.fillText(brl(d.total), x0 + w - 14, ry);
+    }
+    c.textAlign = 'left';
   }
 
   /* ---- quadro branco de ideias ---- */

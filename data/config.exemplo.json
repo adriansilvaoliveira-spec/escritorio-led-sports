@@ -7,6 +7,12 @@
   "empresa": "",
   "porta": 4321,
 
+  "vendas": {
+    "_leia": "Painel VENDAS DO MÊS na parede da Sala de Serviço. arquivo: JSON que o seu sistema de vendas grava, uma linha por venda com data (AAAA-MM-DD), vendedor, total e pecas. vendedores: quem aparece sempre, mesmo zerado. Sem arquivo, o painel só avisa.",
+    "arquivo": "",
+    "vendedores": []
+  },
+
   "reuniao": {
     "_leia": "automatica: false = só quando você clica em Reunir agora. Cada fala é uma chamada ao Claude e consome a cota do seu plano. dias: 0 = domingo ... 6 = sábado.",
     "automatica": false,

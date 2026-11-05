@@ -26,7 +26,8 @@ const CONFIG_PADRAO = {
   nome: 'Escritório de Agentes', subtitulo: 'painel dos seus agentes de IA',
   dono: 'Você', empresa: '', porta: 4321,
   reuniao: { automatica: false, dias: [1, 5], hora: 11, minuto: 0, duracaoMin: 30, modelo: 'sonnet',
-             foco: '', meta: { descricao: '', alvo: 0, feito: 0, unidade: 'resultados', ate: '' } }
+             foco: '', meta: { descricao: '', alvo: 0, feito: 0, unidade: 'resultados', ate: '' } },
+  vendas: { arquivo: '', vendedores: [] }
 };
 function lerConfig() {
   let c = {};
@@ -34,6 +35,35 @@ function lerConfig() {
   const r = Object.assign({}, CONFIG_PADRAO, c);
   r.reuniao = Object.assign({}, CONFIG_PADRAO.reuniao, c.reuniao || {});
   r.reuniao.meta = Object.assign({}, CONFIG_PADRAO.reuniao.meta, (c.reuniao || {}).meta || {});
+  r.vendas = Object.assign({}, CONFIG_PADRAO.vendas, c.vendas || {});
+  return r;
+}
+
+/* ---------------- vendas do mês (mural) ----------------
+   Lê a lista de vendas que outro sistema grava (config.vendas.arquivo: um
+   JSON com { data: 'AAAA-MM-DD', vendedor, total, pecas } por ficha) e soma
+   o mês atual por vendedor. Só lê: quem escreve é o sistema de fichas. */
+const semAcento = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').trim().toUpperCase();
+function vendasDoMes(agora = new Date()) {
+  const cfg = lerConfig().vendas;
+  const mes = `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}`;
+  const r = { mes, vendedores: [], total: 0, configurado: !!cfg.arquivo, erro: null };
+  if (!cfg.arquivo) return r;
+  // os vendedores do config aparecem sempre, mesmo zerados, na ordem dada
+  const por = new Map();
+  for (const nome of cfg.vendedores || []) por.set(semAcento(nome), { nome, fichas: 0, pecas: 0, total: 0 });
+  let lista = [];
+  try { lista = JSON.parse(fs.readFileSync(cfg.arquivo, 'utf8')); }
+  catch (e) { if (e.code !== 'ENOENT') r.erro = 'não consegui ler a lista de vendas'; }
+  for (const x of Array.isArray(lista) ? lista : []) {
+    if (!String(x.data || '').startsWith(mes)) continue;
+    const k = semAcento(x.vendedor) || 'SEM VENDEDOR';
+    const v = por.get(k) || { nome: String(x.vendedor || 'SEM VENDEDOR'), fichas: 0, pecas: 0, total: 0 };
+    v.fichas++; v.pecas += Number(x.pecas) || 0; v.total = Math.round((v.total + (Number(x.total) || 0)) * 100) / 100;
+    por.set(k, v);
+  }
+  r.vendedores = [...por.values()];
+  r.total = Math.round(r.vendedores.reduce((s, v) => s + v.total, 0) * 100) / 100;
   return r;
 }
 const PORT = Number(process.env.PORT) || Number(lerConfig().porta) || 4321;
@@ -734,6 +764,7 @@ const servidor = http.createServer(async (req, res) => {
     });
     return;
   }
+  if (rota === '/api/vendas' && req.method === 'GET') return json(res, 200, vendasDoMes());
   if (rota === '/api/agenda' && req.method === 'GET') {
     return json(res, 200, { itens: lerAgenda() });
   }
