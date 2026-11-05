@@ -4,8 +4,8 @@
    Abre dentro do monitor dele no escritório. Lista os moldes que
    estão no Google Drive e grava cada pedido na pasta do cliente:
 
-     ARTES\CLIENTES\<CLIENTE>\PEDIDO <data hora>\
-       PEDIDO.txt, pedido.json, DESENHO\, LOGO\, PATROCINIO\
+     ARTES\CLIENTES\<CLIENTE>\
+       PEDIDO <data hora>.txt e .json, e os anexos em REFERENCIA\
 
    Também recebe alteração de arte pronta: copia o arquivo informado
    e nunca mexe no original. O molde e o mockup são feitos na conversa
@@ -22,7 +22,12 @@ const RAIZ_PADRAO = process.env.DESENHO_RAIZ || 'G:\\Meu Drive\\AUTOMAÇÃO LEDS
 const LIMITE_ARQUIVO = 500 * 1024 * 1024;
 const LIMITE_JSON = 100 * 1024;
 const CACHE_MODELOS_MS = 60 * 1000;
-const PASTAS_ANEXO = { desenho: 'DESENHO', logo: 'LOGO', patrocinio: 'PATROCINIO' };
+const PASTAS_ANEXO = { desenho: 'REFERÊNCIA/DESENHO', logo: 'LOGO/ESCUDO', patrocinio: 'PATROCÍNIO' };
+// as artes ficam na raiz do Drive (ARTES\CLIENTES), não dentro de DESENHO
+const PASTA_ARTES = process.env.DESENHO_ARTES || path.join(RAIZ_PADRAO, 'ARTES', 'CLIENTES');
+const pastaCliente = cliente => path.join(PASTA_ARTES, cliente);
+const pastaReferencia = cliente => path.join(pastaCliente(cliente), 'REFERENCIA');
+const ehCalcao = grupo => semAcento(grupo) === 'CALCAO';
 const IGNORAR_MOLDE = /TESTE|C[óo]pia_de_seguran[çc]a/i;
 const URL_CONVERSA = process.env.DESENHO_CONVERSA_URL || 'http://localhost:4404';
 const EXT_ARTE = /\.(cdr|ai|eps|psd|psb|pdf|svg|jpe?g|png)$/i;
@@ -93,25 +98,37 @@ const carimbo = () => {
 
 function textoPedido(p) {
   if (p.tipo === 'alteracao') return textoAlteracao(p);
-  const c = p.cores || {};
+  const c = p.cores || {}, d = p.detalhes || {}, n = d.numero || {};
+  const simNao = v => v ? 'sim' : 'não';
   const linhas = [
     `PEDIDO DE DESENHO - ${p.cliente}`,
     `Recebido em: ${p.recebido}`,
     `Origem: ${p.origem}`,
-    `Já é cliente da loja: ${p.clienteDaLoja ? 'sim' : 'não'}`,
+    `Já é cliente da loja: ${simNao(p.clienteDaLoja)}`,
     '',
-    `Modelo: ${p.modelo}`,
+    `Modelo da camisa: ${p.modelo}`,
     `Mockup sugerido: ${p.mockup || 'nenhum encontrado no Drive - perguntar antes de seguir'}`,
+    `Modelo do calção: ${p.calcao || 'o do kit / não informado'}`,
+    `Time ou camisa de referência: ${d.referencia || '-'}`,
     '',
     `Cor principal: ${c.principal || '-'}`,
     `Cor secundária: ${c.secundaria || '-'}`,
     `Cor dos detalhes: ${c.detalhes || '-'}`,
+    `Cor do calção: ${c.calcao || '-'}`,
+    `Cor do meião: ${c.meiao || '-'}`,
     `Outras cores: ${c.outras || '-'}`,
+    `Gola e punho: ${d.gola || '-'}`,
+    '',
+    `Fonte do número e do nome: ${d.fonte || 'escolher a que combina e avisar'}`,
+    `Número: frente ${simNao(n.frente)}, costas ${simNao(n.costas)}, calção ${simNao(n.calcao)}`,
+    `Nome nas costas: ${simNao(d.nomeCostas)}`,
+    `Escudo ou mascote: ${d.escudo || '-'}`,
+    `Patrocínios e onde vão: ${d.patrocinios || '-'}`,
     '',
     'Observações:',
     p.observacoes || '-',
     '',
-    'Anexos:'
+    `Anexos (em ${pastaReferencia(p.cliente)}):`
   ];
   for (const t of Object.keys(PASTAS_ANEXO)) {
     const lista = (p.anexos && p.anexos[t]) || [];
@@ -123,31 +140,42 @@ function textoPedido(p) {
 const pedidos = new Map();   // id -> { pasta, dados }
 
 function gravarPedido(reg) {
-  fs.writeFileSync(path.join(reg.pasta, 'pedido.json'), JSON.stringify(reg.dados, null, 2));
+  fs.writeFileSync(reg.arquivo + '.json', JSON.stringify(reg.dados, null, 2));
   // BOM para o Bloco de Notas acertar os acentos
-  fs.writeFileSync(path.join(reg.pasta, 'PEDIDO.txt'), '\ufeff' + textoPedido(reg.dados));
+  fs.writeFileSync(reg.arquivo + '.txt', '\ufeff' + textoPedido(reg.dados));
 }
+
+const texto = (v, lim = 200) => String(v || '').trim().slice(0, lim);
 
 function criarPedido(b) {
   const cliente = limparNome(b.cliente).toUpperCase();
   const modelo = String(b.modelo || '').trim().slice(0, 120);
+  const calcao = String(b.calcao || '').trim().slice(0, 120);
   if (!cliente) return { ok: false, motivo: 'diga o nome do cliente' };
   if (!modelo) return { ok: false, motivo: 'escolha o modelo' };
   const conhecido = modelos().find(m => m.nome === modelo);
   if (!conhecido) return { ok: false, motivo: 'esse modelo não está na pasta de moldes' };
+  if (calcao && !modelos().some(m => m.nome === calcao && ehCalcao(m.grupo))) return { ok: false, motivo: 'esse calção não está na pasta de moldes' };
   const cores = {};
-  for (const k of ['principal', 'secundaria', 'detalhes', 'outras']) cores[k] = String((b.cores || {})[k] || '').slice(0, 200);
+  for (const k of ['principal', 'secundaria', 'detalhes', 'calcao', 'meiao', 'outras']) cores[k] = texto((b.cores || {})[k]);
+  const d = b.detalhes || {}, n = d.numero || {};
+  const detalhes = {
+    referencia: texto(d.referencia), gola: texto(d.gola), fonte: texto(d.fonte),
+    escudo: texto(d.escudo), patrocinios: texto(d.patrocinios, 500),
+    numero: { frente: n.frente === true, costas: n.costas === true, calcao: n.calcao === true },
+    nomeCostas: d.nomeCostas === true
+  };
 
-  const pastaCliente = path.join(raiz(), 'ARTES', 'CLIENTES', cliente);
-  let pasta = path.join(pastaCliente, 'PEDIDO ' + carimbo());
-  for (let n = 2; fs.existsSync(pasta); n++) pasta = path.join(pastaCliente, `PEDIDO ${carimbo()} (${n})`);
-  fs.mkdirSync(pasta, { recursive: true });
+  const pasta = pastaCliente(cliente);
+  fs.mkdirSync(pastaReferencia(cliente), { recursive: true });
+  let arquivo = path.join(pasta, 'PEDIDO ' + carimbo());
+  for (let k = 2; fs.existsSync(arquivo + '.txt'); k++) arquivo = path.join(pasta, `PEDIDO ${carimbo()} (${k})`);
 
   const id = crypto.randomUUID();
   const reg = {
-    pasta,
+    pasta, arquivo,
     dados: {
-      cliente, modelo, mockup: conhecido.mockup, cores,
+      cliente, modelo, mockup: conhecido.mockup, calcao, cores, detalhes,
       clienteDaLoja: b.clienteDaLoja === true,
       observacoes: String(b.observacoes || '').slice(0, 5000),
       origem: 'escritório', recebido: new Date().toLocaleString('pt-BR'),
@@ -177,6 +205,7 @@ function textoAlteracao(p) {
     '',
     'Anexos:'
   ];
+  linhas.push(`  (em ${pastaReferencia(p.cliente)})`);
   for (const t of Object.keys(PASTAS_ANEXO)) {
     const lista = (p.anexos && p.anexos[t]) || [];
     linhas.push(`  ${PASTAS_ANEXO[t]}: ${lista.length ? lista.join(', ') : '-'}`);
@@ -216,11 +245,11 @@ async function criarAlteracao(b) {
   }
   if (!informados.length) return { ok: false, motivo: 'informe onde está o molde ou o mockup' };
 
-  const pastaCliente = path.join(raiz(), 'ARTES', 'CLIENTES', cliente);
-  let pasta = path.join(pastaCliente, 'ALTERACAO ' + carimbo());
-  for (let n = 2; fs.existsSync(pasta); n++) pasta = path.join(pastaCliente, `ALTERACAO ${carimbo()} (${n})`);
+  let pasta = path.join(pastaCliente(cliente), 'ALTERACAO ' + carimbo());
+  for (let n = 2; fs.existsSync(pasta); n++) pasta = path.join(pastaCliente(cliente), `ALTERACAO ${carimbo()} (${n})`);
   const original = path.join(pasta, 'ORIGINAL');
   fs.mkdirSync(original, { recursive: true });
+  fs.mkdirSync(pastaReferencia(cliente), { recursive: true });
 
   // só lê o arquivo de origem: vale também para a pasta de produção, que é só para ver
   const copias = [];
@@ -231,7 +260,7 @@ async function criarAlteracao(b) {
   }
   const id = crypto.randomUUID();
   const reg = {
-    pasta,
+    pasta, arquivo: path.join(pasta, 'PEDIDO'),
     dados: {
       tipo: 'alteracao', cliente, informados, copias, observacoes,
       origem: 'escritório', recebido: new Date().toLocaleString('pt-BR'),
@@ -245,15 +274,19 @@ async function criarAlteracao(b) {
 
 /* ---------- entrega o pedido à conversa do cliente no funcionário Desenho ---------- */
 function mensagemParaDesenho(reg) {
-  const pedido = path.join(reg.pasta, 'PEDIDO.txt');
+  const pedido = reg.arquivo + '.txt';
+  const ref = pastaReferencia(reg.dados.cliente);
   if (reg.dados.tipo === 'alteracao') {
     return [
-      `ALTERAÇÃO de arte pronta, pedida pelo escritório. Leia ${pedido} e os anexos em ${reg.pasta}.`,
+      `ALTERAÇÃO de arte pronta, pedida pelo escritório. Leia ${pedido}; os anexos estão em ${ref}.`,
       `Edite só as cópias da pasta ORIGINAL, e salve o resultado em ${reg.pasta}. Nunca mexa nos arquivos de origem.`,
       'Mude apenas o que foi pedido e mantenha todo o resto igual. Se veio molde, altere o molde primeiro, exporte a prévia, escreva o caminho completo dela e espere a aprovação antes de atualizar o mockup. Se veio só o mockup, altere e mostre a prévia do mesmo jeito.'
     ].join('\n');
   }
-  return `Novo pedido de desenho, feito pelo escritório. Leia ${pedido} e os anexos em ${reg.pasta}, e siga o fluxo: molde, prévia com o caminho completo, e espere a aprovação antes do mockup.`;
+  return [
+    `Novo pedido de desenho, feito pelo escritório. Leia ${pedido}: ele já traz tudo o que o dono informou. Liste ${ref} e use os logos de lá direto.`,
+    `Siga a memória receita-arte-led e trabalhe em ${reg.pasta}. Fluxo: molde, prévia com o caminho completo, e PARE esperando a aprovação antes do mockup.`
+  ].join('\n');
 }
 
 async function postarConversa(rota, corpo) {
@@ -296,7 +329,8 @@ function receberArquivo(req, res, reg, tipo, nomeBruto) {
   if (!nome) return json(res, 400, { ok: false, motivo: 'arquivo sem nome' });
   if (Number(req.headers['content-length']) > LIMITE_ARQUIVO) return json(res, 413, { ok: false, motivo: 'arquivo maior que 500 MB' });
 
-  const destino = path.join(reg.pasta, PASTAS_ANEXO[tipo]);
+  // tudo o que o dono manda vai para REFERENCIA, onde o Desenho sempre procura
+  const destino = pastaReferencia(reg.dados.cliente);
   fs.mkdirSync(destino, { recursive: true });
   const final = nomeLivre(destino, nome);
   const arquivo = path.join(destino, final);

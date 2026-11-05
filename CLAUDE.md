@@ -12,8 +12,11 @@ mensagem em português dizendo o que mudou, e `git push`. Não deixe mudança s�
   configuração, equipe e a chave do CallMeBot. O repositório é público — nunca
   versionar segredos.
 - `agente-desenho/`: formulário do funcionário Desenho (porta 4402), com novo desenho e alteração de
-  arte pronta. Grava em `DESENHO\ARTES\CLIENTES\<CLIENTE>` no Google Drive e entrega à conversa do
-  cliente; dados de cliente nunca entram no git.
+  arte pronta. Pede o pedido completo (camisa, calção, referência, cores da paleta, gola, fonte,
+  número, nome, escudo, patrocínios). Grava em `ARTES\CLIENTES\<CLIENTE>` na raiz do Drive (nunca em
+  `DESENHO\ARTES`), com os anexos em `REFERENCIA`, e entrega à conversa do cliente. O Desenho (4404)
+  roda no Sonnet com esforço médio, segue a memória `receita-arte-led` do projeto SAFUL e nunca
+  acessa o Nextcloud. Dados de cliente nunca entram no git.
 - `agente-fichas/`: conversa por cliente, com anexos, dos funcionários Fichas (porta 4403) e Desenho
   (`AGENTE=desenho`, porta 4404). O cadastro deles está em `data/sistemas.json`. Pelo WhatsApp só o
   Fichas recebe pedido ("Ficha TIME"); desenho é feito direto no Claude.

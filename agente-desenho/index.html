@@ -64,9 +64,17 @@
         <label class="marcar"><input type="checkbox" id="daloja"> Já é cliente da loja</label>
       </div>
       <div class="campo so-novo">
-        <label for="modelo">Modelo</label>
+        <label for="modelo">Modelo da camisa (ou kit)</label>
         <select id="modelo" required><option value="">Carregando os moldes do Drive...</option></select>
         <p class="dica" id="sobre-modelo"></p>
+      </div>
+      <div class="campo so-novo">
+        <label for="calcao">Modelo do calção</label>
+        <select id="calcao"><option value="">O do kit / sem calção</option></select>
+      </div>
+      <div class="campo so-novo">
+        <label for="referencia">Time ou camisa de referência</label>
+        <input type="text" id="referencia" maxlength="200" placeholder="ex.: Inter 2025 titular (ele pesquisa e redesenha)">
       </div>
     </section>
 
@@ -88,14 +96,46 @@
       <div class="campo"><label id="r-principal">Cor principal</label><div class="swatches" data-cor="principal" role="group" aria-labelledby="r-principal"></div></div>
       <div class="campo"><label id="r-secundaria">Cor secundária</label><div class="swatches" data-cor="secundaria" role="group" aria-labelledby="r-secundaria"></div></div>
       <div class="campo"><label id="r-detalhes">Cor dos detalhes</label><div class="swatches" data-cor="detalhes" role="group" aria-labelledby="r-detalhes"></div></div>
+      <div class="campo"><label id="r-calcao">Cor do calção</label><div class="swatches" data-cor="calcao" role="group" aria-labelledby="r-calcao"></div></div>
+      <div class="campo"><label id="r-meiao">Cor do meião</label><div class="swatches" data-cor="meiao" role="group" aria-labelledby="r-meiao"></div></div>
+      <div class="campo">
+        <label for="gola">Gola e punho</label>
+        <input type="text" id="gola" maxlength="200" placeholder="ex.: gola V preta com filete branco">
+      </div>
       <div class="campo">
         <label for="outras">Outras cores ou cor fora da paleta</label>
-        <input type="text" id="outras" maxlength="200" placeholder="ex.: gola preta com filete dourado">
+        <input type="text" id="outras" maxlength="200" placeholder="ex.: faixa dourada no ombro">
+      </div>
+    </section>
+
+    <section class="so-novo">
+      <h2>Número, nome e logos</h2>
+      <div class="campo">
+        <label for="fonte">Fonte do número e do nome</label>
+        <input type="text" id="fonte" maxlength="200" placeholder="ex.: Flamengo 2024 (em branco: ele escolhe e avisa)">
+      </div>
+      <div class="campo">
+        <label>Onde vai número</label>
+        <label class="marcar"><input type="checkbox" id="num-frente"> Frente</label>
+        <label class="marcar"><input type="checkbox" id="num-costas" checked> Costas</label>
+        <label class="marcar"><input type="checkbox" id="num-calcao"> Calção</label>
+      </div>
+      <div class="campo">
+        <label class="marcar"><input type="checkbox" id="nome-costas"> Nome nas costas</label>
+      </div>
+      <div class="campo">
+        <label for="escudo">Escudo ou mascote</label>
+        <input type="text" id="escudo" maxlength="200" placeholder="ex.: escudo anexo no peito esquerdo; precisa redesenhar">
+      </div>
+      <div class="campo">
+        <label for="patrocinios">Patrocínios e onde vão</label>
+        <input type="text" id="patrocinios" maxlength="500" placeholder="ex.: Padaria X no peito, Auto Y nas costas acima do número">
       </div>
     </section>
 
     <section>
       <h2>Anexos</h2>
+      <p class="dica" style="margin:0 0 10px">Tudo vai para ARTES\CLIENTES\&lt;CLIENTE&gt;\REFERENCIA. Mande o logo na melhor qualidade que tiver.</p>
       <div class="anexos">
         <div class="anexo"><strong>Desenho ou referência</strong><input type="file" multiple data-tipo="desenho" aria-label="Desenho ou referência"><ul></ul></div>
         <div class="anexo"><strong>Logo ou escudo</strong><input type="file" multiple data-tipo="logo" aria-label="Logo ou escudo"><ul></ul></div>
@@ -121,7 +161,8 @@
 const PALETA = ['#000000','#FFFFFF','#840C06','#FF6600','#DAA041','#FDD100','#FFEF00','#00FF00','#006025','#00913C','#00CBBC','#2F9D9E','#00B4E8','#009DDF','#004498','#002145','#5A5A5F','#0000FF','#B0AFB5','#5A0F80','#FFB4E8','#DA007F','#6C001F','#E00006'];
 const URL_CONVERSAS = 'http://localhost:4404/';
 const $ = s => document.querySelector(s);
-const cores = { principal: '', secundaria: '', detalhes: '' };
+const cores = { principal: '', secundaria: '', detalhes: '', calcao: '', meiao: '' };
+const ehCalcao = g => g.normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase() === 'CALCAO';
 let modelos = [], alterando = false;
 
 const ABAS = {
@@ -185,6 +226,7 @@ async function carregarModelos() {
       if (!grupos.has(m.grupo)) { const g = document.createElement('optgroup'); g.label = m.grupo; sel.appendChild(g); grupos.set(m.grupo, g); }
       grupos.get(m.grupo).appendChild(new Option(m.nome, m.nome));
     }
+    for (const m of modelos.filter(x => ehCalcao(x.grupo))) $('#calcao').add(new Option(m.nome, m.nome));
   } catch (e) {
     sel.textContent = ''; sel.add(new Option('Não consegui ler os moldes', ''));
     mensagem('erro', e.message);
@@ -221,7 +263,17 @@ $('#f').addEventListener('submit', async e => {
     mensagem('', alterando ? 'Copiando a arte para a pasta do cliente. Um mockup grande pode levar alguns minutos...' : 'Criando a pasta do cliente...');
     const p = alterando
       ? await postar('/api/alteracao', { cliente, molde: $('#molde').value, mockup: $('#mockup').value, observacoes: obs })
-      : await postar('/api/pedido', { cliente, modelo, cores: Object.assign({ outras: $('#outras').value }, cores), observacoes: obs, clienteDaLoja: $('#daloja').checked });
+      : await postar('/api/pedido', {
+          cliente, modelo, calcao: $('#calcao').value,
+          cores: Object.assign({ outras: $('#outras').value }, cores),
+          detalhes: {
+            referencia: $('#referencia').value, gola: $('#gola').value, fonte: $('#fonte').value,
+            escudo: $('#escudo').value, patrocinios: $('#patrocinios').value,
+            numero: { frente: $('#num-frente').checked, costas: $('#num-costas').checked, calcao: $('#num-calcao').checked },
+            nomeCostas: $('#nome-costas').checked
+          },
+          observacoes: obs, clienteDaLoja: $('#daloja').checked
+        });
     if (!p.ok) throw new Error(p.motivo);
 
     const arquivos = [];

@@ -22,7 +22,7 @@ const EH_DESENHO = process.env.AGENTE === 'desenho';
 const PORTA = Number(process.env.PORT) || (EH_DESENHO ? 4404 : 4403);
 const PROJETO = process.env.FICHAS_PROJETO || (EH_DESENHO ? path.join(os.homedir(), 'Downloads', 'SAFUL') : path.join(os.homedir(), 'Desktop', 'sistema automação wpp'));
 const PASTA_FICHAS = process.env.FICHAS_DRIVE || 'G:\\Meu Drive\\AUTOMAÇÃO LEDSPORTS ATIBAIA\\FICHAS';
-const PASTA_ARTES = process.env.DESENHO_DRIVE || 'G:\\Meu Drive\\AUTOMAÇÃO LEDSPORTS ATIBAIA\\DESENHO\\ARTES\\CLIENTES';
+const PASTA_ARTES = process.env.DESENHO_DRIVE || 'G:\\Meu Drive\\AUTOMAÇÃO LEDSPORTS ATIBAIA\\ARTES\\CLIENTES';
 const DADOS = process.env.FICHAS_DADOS || path.join(__dirname, EH_DESENHO ? 'dados-desenho' : 'dados');
 const ARQ_CONVERSAS = path.join(DADOS, 'conversas.json');
 const LIMITE_ARQUIVO = 200 * 1024 * 1024;
@@ -44,15 +44,17 @@ const PAPEL_FICHAS = [
 ].join('\n');
 
 const PAPEL_DESENHO = [
-  'Você é o funcionário Desenho da LED SPORTS. O dono manda referências, logos, patrocínios e informações, e você monta o uniforme.',
-  'Fale em português do Brasil, em texto simples e curto. Trabalhe como nas conversas de desenho: suas regras estão na memória deste projeto e em Desktop\\CLAUDE\\TUDO QUE O CLAUDE SABE.md.',
-  'Tudo do desenho fica em G:\\Meu Drive\\AUTOMAÇÃO LEDSPORTS ATIBAIA\\DESENHO: MOLDE DE COSTURA (CDR), BASE MOCKUPS (PSD), BANCO DE DADOS (fundos por tema e a pasta AIMARI), REFERENCIAS e ARTES. Procure fundos primeiro em BANCO DE DADOS. Nunca altere os arquivos base: copie para DESENHO\\ARTES\\CLIENTES\\<CLIENTE> e trabalhe na cópia. Salve lá o CDR, o PSD e o JPG. Os anexos recebidos estão em DESENHO\\ARTES\\CLIENTES\\<CLIENTE>\\ENTRADA.',
-  'Os scripts de Corel e Photoshop estão em Desktop\\_SCRIPTS LED. Eles vieram de outro computador: troque caminhos antigos (C:\\Users\\Gigabyte Aorus, Desktop\\MODELOS, Desktop\\CLIENTES) antes de usar. Cores: Desktop\\CORES COREL.xml.',
-  'Se o dono disser que já é cliente da loja, procure pelo nome em LED SPORTS Dropbox e no Nextcloud, só para ver, antes de vetorizar. Cliente novo não precisa disso.',
-  'No Nextcloud, comandos de terminal são bloqueados de propósito: procure com as ferramentas Glob e Grep em subpastas específicas, abra com Read e copie para a pasta do cliente pedindo ao dono, se precisar. Se o dono passar um caminho, comece por ele.',
-  'Você não tem navegador aqui. Se precisar de vetor do Aimari ou do Firefly, diga exatamente o que falta e peça para o dono mandar o arquivo.',
-  'Fluxo obrigatório: monte o molde, exporte a prévia em JPG ou PNG, escreva o caminho completo dela e PARE esperando a aprovação. Só faça o mockup depois do ok. Ao terminar o mockup, escreva o caminho completo do JPG. Se faltar algo que muda o desenho, pergunte tudo numa mensagem só.',
-  'Limites: nunca envie nada ao cliente; nunca ligue, desligue ou altere o robô do WhatsApp; nunca leia arquivos .env; nunca grave, mova ou apague nada no Nextcloud; não apague trabalhos existentes sem o dono pedir.'
+  'Você é o funcionário Desenho da LED SPORTS. O dono manda o pedido pelo formulário, com referências, logos e patrocínios, e você monta o uniforme.',
+  'Fale em português do Brasil, em texto simples e curto. Comece SEMPRE pela memória receita-arte-led deste projeto e abra outra memória só se o trabalho pedir (Firefly, listras, troca de molde, paleta).',
+  'Pastas (raiz G:\\Meu Drive\\AUTOMAÇÃO LEDSPORTS ATIBAIA): moldes em DESENHO\\MOLDE DE COSTURA (camisas em CAMISAS, calções em CALÇÃO), bases em DESENHO\\BASE MOCKUPS, banco em DESENHO\\BANCO DE DADOS\\{AIMARI,ESCUDOS,MASCOTES,PATROCINIOS}. Nunca altere os arquivos base: copie e trabalhe na cópia.',
+  'Tudo do cliente fica em G:\\Meu Drive\\AUTOMAÇÃO LEDSPORTS ATIBAIA\\ARTES\\CLIENTES\\<CLIENTE>: o pedido (PEDIDO <data>.txt), os anexos em REFERENCIA e os desenhos (CDR, PSD e JPG). Salve os desenhos só ali. Liste REFERENCIA primeiro e use os logos direto. Escudo redesenhado, mascote e patrocínio também vão para o BANCO DE DADOS.',
+  'Scripts de Corel e Photoshop: Desktop\\CLIENTES\\_SCRIPTS LED. Cores só da paleta LED (Desktop\\CORES COREL.xml); se faltar a cor, pergunte.',
+  'Se o dono disser que já é cliente da loja, procure pelo nome no LED SPORTS Dropbox (sempre com filtro de nome, nunca listando tudo), só para ver, antes de vetorizar.',
+  'Economize: veja imagens só pelo led_ver.ps1 (nunca abra a prévia em tamanho cheio), não liste pastas grandes sem filtro, não explore o que a receita já responde, e ajuste só o objeto afetado em vez de refazer o molde.',
+  'Qualidade: contorno branco sólido em logo sobre cor, nunca brilho; número, LED e escudo centrados na listra; tudo legível na camisa e no calção antes de mostrar.',
+  'NUNCA acesse a pasta Nextcloud2 (nem para ler). Você não tem navegador aqui: se precisar de vetor do Aimari, do Firefly ou do modelo atual de um time, diga exatamente o que falta e peça para o dono mandar o arquivo para REFERENCIA.',
+  'Fluxo obrigatório: monte o molde, exporte a prévia em JPG, escreva o caminho completo dela e PARE esperando a aprovação. Só faça o mockup depois do ok. Ao terminar o mockup, escreva o caminho completo do JPG. Se faltar algo que muda o desenho, pergunte tudo numa mensagem só.',
+  'Limites: nunca envie nada ao cliente; nunca ligue, desligue ou altere o robô do WhatsApp; nunca leia arquivos .env; não apague trabalhos existentes sem o dono pedir.'
 ].join('\n');
 const PAPEL = EH_DESENHO ? PAPEL_DESENHO : PAPEL_FICHAS;
 
@@ -73,7 +75,7 @@ function gravar() {
 
 const limparNome = (t, lim = 80) => String(t || '')
   .replace(/[<>:"/\\|?*\x00-\x1f]/g, ' ').replace(/\s+/g, ' ').replace(/^[.\s]+|[.\s]+$/g, '').slice(0, lim).trim();
-const pastaAnexos = c => EH_DESENHO ? path.join(PASTA_ARTES, c.cliente, 'ENTRADA') : path.join(PASTA_FICHAS, 'PEDIDOS RECEBIDOS', c.cliente);
+const pastaAnexos = c => EH_DESENHO ? path.join(PASTA_ARTES, c.cliente, 'REFERENCIA') : path.join(PASTA_FICHAS, 'PEDIDOS RECEBIDOS', c.cliente);
 const resumo = c => ({ id: c.id, cliente: c.cliente, estado: c.estado, quando: c.atualizado });
 
 /* ---------- Claude: um pedido por vez, porque o Excel só aguenta um ---------- */
@@ -97,8 +99,8 @@ function executar(c, prompt, fim) {
   const [bin, ...base] = comandoClaude();
   const args = [...base, '-p', '--output-format', 'stream-json', '--verbose', '--permission-mode', 'acceptEdits',
                 '--allowedTools', FERRAMENTAS, '--append-system-prompt', PAPEL];
-  // ficha é trabalho repetido e pede resposta rápida; o Desenho segue no modelo padrão
-  if (!EH_DESENHO) args.push('--model', 'claude-sonnet-5-5', '--effort', 'medium');
+  // os dois no Sonnet com esforço médio: o plano tem limite semanal e o pedido já chega completo
+  args.push('--model', 'claude-sonnet-5-5', '--effort', 'medium');
   if (c.sessao) args.push('--resume', c.sessao);
 
   const avisar = texto => c.historico.push({ quem: 'sistema', texto, quando: Date.now() });
