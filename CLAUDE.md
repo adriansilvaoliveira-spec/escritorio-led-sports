@@ -29,6 +29,9 @@ mensagem em português dizendo o que mudou, e `git push`. Não deixe mudança s�
 - Painel VENDAS do mês (parede norte da Sala de Serviço, `js/vendas.js` + `/api/vendas`): só lê
   `config.vendas.arquivo` (neste PC, `C:\LED-atendente\app\vendas.json`, que o programa de fichas
   e o atendente do WhatsApp gravam) e soma o mês por vendedor (FÁBIO, JUNINHO).
+- Quadro branco da Diretoria: ideias à esquerda (`/api/quadro`, `data/quadro.json`, editadas no
+  botão 📌 Quadro) e o esquema FUNIL DO MÊS à direita (`/api/funil`, que lê `config.funil.url` =
+  `http://localhost:3300/painel/api/mes` do Kanban do atendente, com cache de 1 min).
 - Tudo que gera ficha tem de gravar nessa lista, senão a venda não conta: o agente de fichas do
   Fábio e o do Juninho dentro do atendente (3300), a telinha `programa-fichas` (3210) e o Fichas
   (4403, com `FICHAS_PROJETO=C:\LED-atendente`). A cópia antiga em `Desktop\sistema automação wpp`

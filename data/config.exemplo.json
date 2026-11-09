@@ -13,6 +13,11 @@
     "vendedores": []
   },
 
+  "funil": {
+    "_leia": "Esquema FUNIL DO MÊS no quadro branco da Diretoria. url: endereço que responde { pediram, funil: [{ id, n }], parados: [] } para ?ano=&mes= (no atendente da LED, /painel/api/mes). Vazio: o quadro só mostra as ideias.",
+    "url": ""
+  },
+
   "reuniao": {
     "_leia": "automatica: false = só quando você clica em Reunir agora. Cada fala é uma chamada ao Claude e consome a cota do seu plano. dias: 0 = domingo ... 6 = sábado.",
     "automatica": false,

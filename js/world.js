@@ -573,6 +573,45 @@ const WORLD = (() => {
     c.textAlign = 'left';
   }
 
+  /* ---- funil do mês no quadro branco (js/vendas.js → /api/funil) ---- */
+  const PASSO_NOME = { desenho: 'Desenho', arte_enviada: 'Arte enviada', fechar: 'Fechar', fecharam: 'Venda' };
+  function funilNoQuadro(c, x, y0, larg, cores) {
+    const d = (typeof FUNIL !== 'undefined') ? FUNIL.dados() : {};
+    c.textAlign = 'left';
+    c.font = "700 11px 'Barlow Semi Condensed', sans-serif";
+    c.fillStyle = '#1f5fd0'; c.letterSpacing = '1.5px';
+    c.fillText('FUNIL DO MÊS', x, y0 + 14);
+    c.letterSpacing = '0px';
+    if (!d.configurado || d.erro || !Array.isArray(d.passos)) {
+      c.font = "italic 600 9.5px 'Barlow Semi Condensed', sans-serif";
+      c.fillStyle = 'rgba(70,80,100,.55)';
+      c.fillText(d.erro || (d.configurado ? 'carregando…' : 'ligue em config.funil'), x, y0 + 38);
+      return;
+    }
+    if (d.cobrar) {
+      c.textAlign = 'right';
+      c.font = "700 9.5px 'Barlow Semi Condensed', sans-serif";
+      c.fillStyle = '#d8342a';
+      c.fillText(`cobrar: ${d.cobrar}`, x + larg, y0 + 14);
+      c.textAlign = 'left';
+    }
+    const passos = [{ nome: 'Pediram', n: d.pediram }, ...d.passos.map(p => ({ nome: PASSO_NOME[p.id] || p.id, n: p.n }))];
+    const topo = Math.max(1, passos[0].n), rotulo = 62, num = 22;
+    passos.slice(0, 5).forEach((p, i) => {
+      const ry = y0 + 32 + i * 11.5;
+      c.font = "600 9.5px 'Barlow Semi Condensed', sans-serif";
+      c.fillStyle = '#334155';
+      c.fillText(p.nome, x, ry);
+      // barra de marca-texto, proporcional a quem pediu; zero vira só um tracinho
+      const bw = Math.max(3, (larg - rotulo - num) * (p.n / topo));
+      c.fillStyle = ISO.rgba(cores[i % cores.length], .55);
+      ISO.rrect(c, x + rotulo, ry - 4.5, bw, 7, 2.5); c.fill();
+      c.font = "700 9.5px 'Barlow', sans-serif";
+      c.fillStyle = cores[i % cores.length];
+      c.fillText(String(p.n), x + rotulo + bw + 4, ry);
+    });
+  }
+
   /* ---- quadro branco de ideias ---- */
   function signQuadro(c, len) {
     const ideias = (typeof QUADRO !== 'undefined') ? QUADRO.ideias() : [];
@@ -603,19 +642,25 @@ const WORLD = (() => {
     c.strokeStyle = 'rgba(216,52,42,.5)'; c.lineWidth = 1.4;
     c.beginPath(); c.moveTo(x0 + 12, y0 + 22); c.lineTo(x0 + w - 14, y0 + 22); c.stroke();
 
+    // metade esquerda: as ideias; metade direita: o funil do mês, desenhado à caneta
+    const meio = x0 + Math.round(w * 0.54);
     const cores = ['#1f5fd0', '#1f8a4c', '#d8342a', '#7b3fc4', '#0f7f92', '#b8620a'];
+    c.font = "600 9.5px 'Barlow Semi Condensed', sans-serif";
+    const cabe = (txt, larg) => { let t = String(txt); while (t.length > 4 && c.measureText(t).width > larg) t = t.slice(0, -2); return t === String(txt) ? t : t + '…'; };
     ideias.slice(0, 5).forEach((txt, i) => {
-      const ry = y0 + 36 + i * 12.5;
+      const ry = y0 + 34 + i * 11.5;
       c.fillStyle = cores[i % cores.length];
       c.beginPath(); c.arc(x0 + 17, ry - 1, 2, 0, 7); c.fill();
-      c.font = "600 10.5px 'Barlow Semi Condensed', sans-serif";
-      c.fillText(txt, x0 + 25, ry);
+      c.fillText(cabe(txt, meio - x0 - 34), x0 + 25, ry);
     });
     if (!ideias.length) {
       c.font = "italic 600 10px 'Barlow Semi Condensed', sans-serif";
       c.fillStyle = 'rgba(70,80,100,.55)';
       c.fillText('quadro vazio', x0 + 25, y0 + 38);
     }
+    c.strokeStyle = 'rgba(31,95,208,.35)'; c.lineWidth = 1.2;
+    c.beginPath(); c.moveTo(meio - 6, y0 + 27); c.lineTo(meio - 6, y0 + h - 12); c.stroke();
+    funilNoQuadro(c, meio, y0, x0 + w - 14 - meio, cores);
     // canetinhas na bandeja
     ['#d8342a', '#1f5fd0', '#1f8a4c'].forEach((cor, i) => {
       c.fillStyle = cor;

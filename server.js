@@ -27,7 +27,8 @@ const CONFIG_PADRAO = {
   dono: 'Você', empresa: '', porta: 4321,
   reuniao: { automatica: false, dias: [1, 5], hora: 11, minuto: 0, duracaoMin: 30, modelo: 'sonnet',
              foco: '', meta: { descricao: '', alvo: 0, feito: 0, unidade: 'resultados', ate: '' } },
-  vendas: { arquivo: '', vendedores: [] }
+  vendas: { arquivo: '', vendedores: [] },
+  funil: { url: '' }
 };
 function lerConfig() {
   let c = {};
@@ -36,7 +37,41 @@ function lerConfig() {
   r.reuniao = Object.assign({}, CONFIG_PADRAO.reuniao, c.reuniao || {});
   r.reuniao.meta = Object.assign({}, CONFIG_PADRAO.reuniao.meta, (c.reuniao || {}).meta || {});
   r.vendas = Object.assign({}, CONFIG_PADRAO.vendas, c.vendas || {});
+  r.funil = Object.assign({}, CONFIG_PADRAO.funil, c.funil || {});
   return r;
+}
+
+/* ---------------- funil do mês (quadro branco) ----------------
+   Pergunta ao Kanban do atendente (config.funil.url, que responde como
+   /painel/api/mes) quantos clientes passaram por cada etapa no mês e quantos
+   estão parados depois da arte. Guarda 1 minuto para não ficar perguntando. */
+let funilCache = { t: 0, d: null };
+async function funilDoMes(agora = new Date()) {
+  const url = lerConfig().funil.url;
+  if (!url) return { configurado: false };
+  if (funilCache.d && Date.now() - funilCache.t < 60000) return funilCache.d;
+  let d;
+  try {
+    const r = await fetch(`${url}?ano=${agora.getFullYear()}&mes=${agora.getMonth() + 1}`, { signal: AbortSignal.timeout(5000) });
+    const j = await r.json();
+    d = { configurado: true, pediram: j.pediram || 0, passos: (j.funil || []).map(p => ({ id: p.id, n: p.n })),
+          cobrar: (j.parados || []).length };
+  } catch (e) {
+    d = { configurado: true, erro: 'Kanban fora do ar' };
+  }
+  funilCache = { t: Date.now(), d };
+  return d;
+}
+
+/* ---------------- quadro de ideias e agenda (Diretoria) ----------------
+   Mora no disco, como a equipe, para aparecer igual em qualquer navegador. */
+const QUADRO_ARQ = path.join(ROOT, 'data', 'quadro.json');
+function lerQuadro() {
+  try {
+    const q = JSON.parse(fs.readFileSync(QUADRO_ARQ, 'utf8'));
+    if (Array.isArray(q.ideias) && Array.isArray(q.eventos)) return q;
+  } catch (e) { /* ainda não existe */ }
+  return null;
 }
 
 /* ---------------- vendas do mês (mural) ----------------
@@ -765,6 +800,25 @@ const servidor = http.createServer(async (req, res) => {
     return;
   }
   if (rota === '/api/vendas' && req.method === 'GET') return json(res, 200, vendasDoMes());
+  if (rota === '/api/funil' && req.method === 'GET') return json(res, 200, await funilDoMes());
+  if (rota === '/api/quadro' && req.method === 'GET') return json(res, 200, lerQuadro() || { ideias: [], eventos: [], vazio: true });
+  if (rota === '/api/quadro' && req.method === 'PUT') {
+    let bruto = '';
+    req.on('data', c => { bruto += c; if (bruto.length > 2e4) req.destroy(); });
+    req.on('end', () => {
+      let q;
+      try { q = JSON.parse(bruto); } catch (e) { return json(res, 400, { ok: false, motivo: 'json inválido' }); }
+      if (!q || !Array.isArray(q.ideias) || !Array.isArray(q.eventos)) return json(res, 400, { ok: false, motivo: 'faltam ideias e eventos' });
+      const limpo = {
+        ideias: q.ideias.slice(0, 6).map(t => String(t).slice(0, 52)),
+        eventos: q.eventos.slice(0, 6).map(e => ({ data: String(e.data || '').slice(0, 8), nome: String(e.nome || '').slice(0, 34), tipo: String(e.tipo || 'Evento').slice(0, 16) }))
+      };
+      try { fs.writeFileSync(QUADRO_ARQ, JSON.stringify(limpo, null, 2)); }
+      catch (e) { return json(res, 500, { ok: false, motivo: e.message }); }
+      json(res, 200, { ok: true });
+    });
+    return;
+  }
   if (rota === '/api/agenda' && req.method === 'GET') {
     return json(res, 200, { itens: lerAgenda() });
   }
