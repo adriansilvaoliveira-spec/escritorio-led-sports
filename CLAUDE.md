@@ -27,6 +27,9 @@ mensagem em português dizendo o que mudou, e `git push`. Não deixe mudança s�
   montador de fichas do Juninho (`src/pedido-fechado.js` + `emitirPedido` no `servidor.js`). A ficha
   vai PRIMEIRO ao dono na assessoria; o cliente só recebe depois do ok dele ("manda o pedido pro
   FULANO"). Nunca mandar ficha direto ao cliente. No Kanban, o botão 📋 Emitir pedido refaz.
+- Mudou layout/script das fichas em `C:\LED-atendente\app`? Reinicie o `programa-fichas` (3210) pelo
+  escritório; o atendente (3300) precisa de restart se mudou `atendente\src`. Para reenviar ao dono uma
+  ficha refeita: `POST 3300/painel/api/pdf-dono {arquivos:[PDFs da pasta FICHAS], texto}` (só vai ao dono).
 - `agente-fichas/`: conversa por cliente, com anexos, dos funcionários Fichas (porta 4403) e Desenho
   (`AGENTE=desenho`, porta 4404). O cadastro deles está em `data/sistemas.json`. Pelo WhatsApp só o
   Fichas recebe pedido ("Ficha TIME"); desenho é feito direto no Claude.
