@@ -23,6 +23,10 @@ mensagem em português dizendo o que mudou, e `git push`. Não deixe mudança s�
   desenho" para o 4402 (`src/desenho.js`) e devolve a arte ao dono para `aprovar N`. Antes de mexer
   lá, LEIA o arquivo: em 09/11 um `desenho.js` foi sobrescrito sem ler e teve de ser refeito pelo
   histórico.
+- Pedido fechado pelo cliente (etapa "fechado" no atendente) vira ficha de pedido em Excel + PDF pelo
+  montador de fichas do Juninho (`src/pedido-fechado.js` + `emitirPedido` no `servidor.js`). A ficha
+  vai PRIMEIRO ao dono na assessoria; o cliente só recebe depois do ok dele ("manda o pedido pro
+  FULANO"). Nunca mandar ficha direto ao cliente. No Kanban, o botão 📋 Emitir pedido refaz.
 - `agente-fichas/`: conversa por cliente, com anexos, dos funcionários Fichas (porta 4403) e Desenho
   (`AGENTE=desenho`, porta 4404). O cadastro deles está em `data/sistemas.json`. Pelo WhatsApp só o
   Fichas recebe pedido ("Ficha TIME"); desenho é feito direto no Claude.
