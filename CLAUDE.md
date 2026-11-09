@@ -16,7 +16,13 @@ mensagem em português dizendo o que mudou, e `git push`. Não deixe mudança s�
   número, nome, escudo, patrocínios). Grava em `ARTES\CLIENTES\<CLIENTE>` na raiz do Drive (nunca em
   `DESENHO\ARTES`), com os anexos em `REFERENCIA`, e entrega à conversa do cliente. O Desenho (4404)
   roda no Sonnet com esforço médio, segue a memória `receita-arte-led` do projeto SAFUL e nunca
-  acessa o Nextcloud. Dados de cliente nunca entram no git.
+  acessa o Nextcloud. Tem o Chrome do dono (`--chrome`: Firefly, Aimari) e WebSearch/WebFetch, como
+  as conversas por cliente do SAFUL, com regras de economia no `PAPEL_DESENHO`. Dados de cliente
+  nunca entram no git.
+- O atendente (`C:\LED-atendente`, sem git) já manda sozinho o card que chega em "Aguardando
+  desenho" para o 4402 (`src/desenho.js`) e devolve a arte ao dono para `aprovar N`. Antes de mexer
+  lá, LEIA o arquivo: em 09/11 um `desenho.js` foi sobrescrito sem ler e teve de ser refeito pelo
+  histórico.
 - `agente-fichas/`: conversa por cliente, com anexos, dos funcionários Fichas (porta 4403) e Desenho
   (`AGENTE=desenho`, porta 4404). O cadastro deles está em `data/sistemas.json`. Pelo WhatsApp só o
   Fichas recebe pedido ("Ficha TIME"); desenho é feito direto no Claude.

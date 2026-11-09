@@ -29,6 +29,9 @@ const LIMITE_ARQUIVO = 200 * 1024 * 1024;
 const LIMITE_JSON = 200 * 1024;
 const LIMITE_EXECUCAO = (EH_DESENHO ? 45 : 15) * 60 * 1000;
 const FERRAMENTAS = 'Read,Write,Edit,Glob,Grep,Bash,PowerShell';
+// o Desenho também usa o Chrome do dono (Firefly, Aimari) e a internet (modelo atual do time),
+// como nas conversas por cliente do projeto SAFUL
+const FERRAMENTAS_DESENHO = FERRAMENTAS + ',WebSearch,WebFetch,mcp__claude-in-chrome';
 
 const PAPEL_FICHAS = [
   'Você é o funcionário Fichas da LED SPORTS. O dono manda imagens, listas e informações do pedido, e você monta a ficha.',
@@ -52,7 +55,9 @@ const PAPEL_DESENHO = [
   'Se o dono disser que já é cliente da loja, procure pelo nome no LED SPORTS Dropbox (sempre com filtro de nome, nunca listando tudo), só para ver, antes de vetorizar.',
   'Economize: veja imagens só pelo led_ver.ps1 (nunca abra a prévia em tamanho cheio), não liste pastas grandes sem filtro, não explore o que a receita já responde, e ajuste só o objeto afetado em vez de refazer o molde.',
   'Qualidade: contorno branco sólido em logo sobre cor, nunca brilho; número, LED e escudo centrados na listra; tudo legível na camisa e no calção antes de mostrar.',
-  'NUNCA acesse a pasta Nextcloud2 (nem para ler). Você não tem navegador aqui: se precisar de vetor do Aimari, do Firefly ou do modelo atual de um time, diga exatamente o que falta e peça para o dono mandar o arquivo para REFERENCIA.',
+  'NUNCA acesse a pasta Nextcloud2 (nem para ler).',
+  'Você tem o Chrome do dono (ferramentas claude-in-chrome; ele já está logado no Firefly) e a pesquisa na internet. Trabalhe como nas conversas por cliente: logo em baixa qualidade passa primeiro pelo Firefly e depois é vetorizado (memória logo-baixa-qualidade-firefly); vetor de time vem do designsaimari.com, procurado com calma, e se não houver o modelo atual, pesquise o uniforme na internet e redesenhe (memória pesquisar-modelo). Firefly gasta créditos da conta do dono: diga quais logos mandou para lá. Se o Chrome não responder, diga exatamente o que falta e peça o arquivo em REFERENCIA.',
+  'No Chrome, economize: leia a página com read_page, find e get_page_text e tire screenshot só para ver uma imagem, sempre com scale 0.5 ou menor. Use o Firefly só para logo que não dá para vetorizar direto e o Aimari só quando o pedido for de time conhecido; o que já estiver bom em REFERENCIA vai direto.',
   'Fluxo obrigatório: monte o molde, exporte a prévia em JPG, escreva o caminho completo dela e PARE esperando a aprovação. Só faça o mockup depois do ok. Ao terminar o mockup, escreva o caminho completo do JPG. Se faltar algo que muda o desenho, pergunte tudo numa mensagem só.',
   'Limites: nunca envie nada ao cliente; nunca ligue, desligue ou altere o robô do WhatsApp; nunca leia arquivos .env; não apague trabalhos existentes sem o dono pedir.'
 ].join('\n');
@@ -98,7 +103,8 @@ function proximo() {
 function executar(c, prompt, fim) {
   const [bin, ...base] = comandoClaude();
   const args = [...base, '-p', '--output-format', 'stream-json', '--verbose', '--permission-mode', 'acceptEdits',
-                '--allowedTools', FERRAMENTAS, '--append-system-prompt', PAPEL];
+                '--allowedTools', EH_DESENHO ? FERRAMENTAS_DESENHO : FERRAMENTAS, '--append-system-prompt', PAPEL];
+  if (EH_DESENHO) args.push('--chrome');
   // os dois no Sonnet com esforço médio: o plano tem limite semanal e o pedido já chega completo
   args.push('--model', 'claude-sonnet-5-5', '--effort', 'medium');
   if (c.sessao) args.push('--resume', c.sessao);
