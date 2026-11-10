@@ -36,7 +36,9 @@ mensagem em português dizendo o que mudou, e `git push`. Não deixe mudança s�
   Fichas recebe pedido ("Ficha TIME"); desenho é feito direto no Claude.
 - Painel VENDAS do mês (parede norte da Sala de Serviço, `js/vendas.js` + `/api/vendas`): só lê
   `config.vendas.arquivo` (neste PC, `C:\LED-atendente\app\vendas.json`, que o programa de fichas
-  e o atendente do WhatsApp gravam) e soma o mês por vendedor (FÁBIO, JUNINHO).
+  e o atendente do WhatsApp gravam) e soma o mês por vendedor (FÁBIO, JUNINHO). Dia 1º, a partir das
+  9h, o atendente manda sozinho ao dono, pela assessoria, as vendas do mês que fechou
+  (`vendasDoMesQueFechou`, marca em `dados\vendas-mensal.json`); "vendas" / "vendas mes passado" pedem na hora.
 - Quadro branco da Diretoria: ideias à esquerda (`/api/quadro`, `data/quadro.json`, editadas no
   botão 📌 Quadro) e o esquema FUNIL DO MÊS à direita (`/api/funil`, que lê `config.funil.url` =
   `http://localhost:3300/painel/api/mes` do Kanban do atendente, com cache de 1 min).
