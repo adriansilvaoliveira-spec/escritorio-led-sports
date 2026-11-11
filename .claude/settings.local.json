@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add *)",
+      "Bash(git commit -q -m 'Script status.sh para conferir os sistemas sem pedir permissão *)",
+      "Bash(git push *)"
+    ]
+  }
+}
