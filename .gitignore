@@ -8,3 +8,4 @@ data/logs/
 data/reunioes/
 
 agente-fichas/dados*/
+.claude/settings.local.json
