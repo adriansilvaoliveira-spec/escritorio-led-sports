@@ -38,6 +38,8 @@ mensagem em português dizendo o que mudou, e `git push`. Não deixe mudança s�
   ficha refeita: `POST 3300/painel/api/pdf-dono {arquivos:[PDFs da pasta FICHAS], texto}` (só vai ao dono).
   Ficha conferida indo ao cliente (SÓ depois do ok do dono): `POST 3300/painel/api/pdf-cliente {id, arquivos, texto}`.
   Mensagem manual a cliente/dono: sempre por `fetch` em node (UTF-8), nunca curl com texto acentuado.
+  `POST 3300/painel/api/enviar {para, texto, combinado?}` entra no histórico (e `combinado` na observação
+  da ficha); catálogo/tabela a um cliente: `POST 3300/painel/api/documento {id, chave:'modelos:FUTEBOL', texto}`.
   Tirar um card do Kanban: `POST 3300/painel/api/excluir {id}` (a conversa fica em `dados\excluidas.json`).
 - `agente-fichas/`: conversa por cliente, com anexos, dos funcionários Fichas (porta 4403) e Desenho
   (`AGENTE=desenho`, porta 4404). O cadastro deles está em `data/sistemas.json`. Pelo WhatsApp só o
