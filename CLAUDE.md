@@ -20,7 +20,10 @@ mensagem em português dizendo o que mudou, e `git push`. Não deixe mudança s�
   as conversas por cliente do SAFUL, com regras de economia no `PAPEL_DESENHO`. Dados de cliente
   nunca entram no git.
 - O atendente (`C:\LED-atendente`, sem git) já manda sozinho o card que chega em "Aguardando
-  desenho" para o 4402 (`src/desenho.js`) e devolve a arte ao dono para `aprovar N`. Antes de mexer
+  desenho" para o 4402 (`src/desenho.js`) e devolve a arte ao dono para `aprovar N`. Se o cliente
+  muda modelo, cores, número etc. depois do envio, `mudancaDoCliente` manda a diferença ao Desenho.
+  Mensagem que a Meta entrega como `unsupported` (áudio de visualização única etc.): `avisarIlegivel`
+  avisa o dono e SEMPRE pede ao cliente para mandar de novo. Cliente nunca fica sem resposta. Antes de mexer
   lá, LEIA o arquivo: em 09/11 um `desenho.js` foi sobrescrito sem ler e teve de ser refeito pelo
   histórico.
 - Pedido fechado pelo cliente (etapa "fechado" no atendente) vira ficha de pedido em Excel + PDF pelo
