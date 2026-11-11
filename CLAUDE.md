@@ -35,7 +35,8 @@ mensagem em português dizendo o que mudou, e `git push`. Não deixe mudança s�
   FULANO"). Nunca mandar ficha direto ao cliente. No Kanban, o botão 📋 Emitir pedido refaz.
 - Mudou layout/script das fichas em `C:\LED-atendente\app`? Reinicie o `programa-fichas` (3210) pelo
   escritório; o atendente (3300) precisa de restart se mudou `atendente\src`. Para reenviar ao dono uma
-  ficha refeita: `POST 3300/painel/api/pdf-dono {arquivos:[PDFs da pasta FICHAS], texto}` (só vai ao dono).
+  ficha refeita (aprovar arte e mandar pedido pela assessoria só valem com o nome do cliente na
+  mensagem, `citaCliente` em `conversa-dono.js`; "pode mandar" solto vira pergunta): `POST 3300/painel/api/pdf-dono {arquivos:[PDFs da pasta FICHAS], texto}` (só vai ao dono).
   Ficha conferida indo ao cliente (SÓ depois do ok do dono): `POST 3300/painel/api/pdf-cliente {id, arquivos, texto}`.
   Mensagem manual a cliente/dono: sempre por `fetch` em node (UTF-8), nunca curl com texto acentuado.
   `POST 3300/painel/api/enviar {para, texto, combinado?}` entra no histórico (e `combinado` na observação
