@@ -28,11 +28,27 @@ if ($supervisor -or $servidor) {
   exit
 }
 
-$si = ([wmiclass]'Win32_ProcessStartup').CreateInstance()
-$si.ShowWindow = 0   # SW_HIDE: o cmd e o node rodam sem janela
 $cmd = 'cmd /c "' + (Join-Path $pasta 'INICIAR ESCRITORIO.cmd') + '"'
-([wmiclass]'Win32_Process').Create($cmd, $pasta, $si) | Out-Null
-for ($i = 0; $i -lt 40 -and -not (NoAr); $i++) { Start-Sleep -Milliseconds 750 }
+function Iniciar {
+  try {
+    $si = ([wmiclass]'Win32_ProcessStartup').CreateInstance()
+    $si.ShowWindow = 0   # SW_HIDE: o cmd e o node rodam sem janela
+    $r = ([wmiclass]'Win32_Process').Create($cmd, $pasta, $si)
+    if ($r.ReturnValue -ne 0) { throw "WMI devolveu $($r.ReturnValue)" }
+  } catch {
+    # Logo depois do login o WMI às vezes ainda não responde: abre escondido do jeito comum.
+    Start-Process cmd.exe -ArgumentList '/c', ('"' + (Join-Path $pasta 'INICIAR ESCRITORIO.cmd') + '"') -WorkingDirectory $pasta -WindowStyle Hidden
+  }
+}
+# Na inicialização do Windows tenta até 4 vezes (o PC ainda está carregando); no botão, uma.
+$tentativas = if ($SoLigar) { 4 } else { 1 }
+for ($t = 0; $t -lt $tentativas -and -not (NoAr); $t++) {
+  if ($t -gt 0) { Start-Sleep -Seconds 20 }
+  $jaRodando = Get-CimInstance Win32_Process -Filter "Name='cmd.exe'" -ErrorAction SilentlyContinue |
+    Where-Object { $_.CommandLine -like '*INICIAR ESCRITORIO.cmd*' }
+  if (-not $jaRodando) { Iniciar }
+  for ($i = 0; $i -lt 40 -and -not (NoAr); $i++) { Start-Sleep -Milliseconds 750 }
+}
 
 if ($SoLigar) { exit }
 if (NoAr) {
