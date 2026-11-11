@@ -23,7 +23,10 @@ mensagem em português dizendo o que mudou, e `git push`. Não deixe mudança s�
   desenho" para o 4402 (`src/desenho.js`) e devolve a arte ao dono para `aprovar N`. Se o cliente
   muda modelo, cores, número etc. depois do envio, `mudancaDoCliente` manda a diferença ao Desenho.
   Mensagem que a Meta entrega como `unsupported` (áudio de visualização única etc.): `avisarIlegivel`
-  avisa o dono e SEMPRE pede ao cliente para mandar de novo. Cliente nunca fica sem resposta. Antes de mexer
+  avisa o dono e SEMPRE pede ao cliente para mandar de novo. Cliente nunca fica sem resposta.
+  Conversa pausada (dono atendendo pelo celular): a IA não responde, mas `guardarSemResponder` guarda
+  no histórico tudo o que o cliente mandou. Assessoria só com o necessário: imagem com `_` no nome é
+  trabalho do Desenho e não vai ao dono; pedido de desenho e mudança do cliente só avisam se falhar. Antes de mexer
   lá, LEIA o arquivo: em 09/11 um `desenho.js` foi sobrescrito sem ler e teve de ser refeito pelo
   histórico.
 - Pedido fechado pelo cliente (etapa "fechado" no atendente) vira ficha de pedido em Excel + PDF pelo
