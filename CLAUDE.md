@@ -45,6 +45,9 @@ mensagem em português dizendo o que mudou, e `git push`. Não deixe mudança s�
 - `agente-fichas/`: conversa por cliente, com anexos, dos funcionários Fichas (porta 4403) e Desenho
   (`AGENTE=desenho`, porta 4404). O cadastro deles está em `data/sistemas.json`. Pelo WhatsApp só o
   Fichas recebe pedido ("Ficha TIME"); desenho é feito direto no Claude.
+- Mockup (porta 4405, `AGENTE=mockup` no mesmo `agente-fichas`): pega o molde aprovado e monta o
+  mockup numa cópia da base `DESENHO\BASE MOCKUPS\2027` na pasta do cliente; regras no `PAPEL_MOCKUP`.
+  Não mexe no atendente nem nos agentes do Fábio e do Juninho.
 - Painel VENDAS do mês (parede norte da Sala de Serviço, `js/vendas.js` + `/api/vendas`): só lê
   `config.vendas.arquivo` (neste PC, `C:\LED-atendente\app\vendas.json`, que o programa de fichas
   e o atendente do WhatsApp gravam) e soma o mês por vendedor (FÁBIO, JUNINHO). Dia 1º, a partir das
