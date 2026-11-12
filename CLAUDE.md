@@ -48,6 +48,10 @@ mensagem em português dizendo o que mudou, e `git push`. Não deixe mudança s�
 - Mockup (porta 4405, `AGENTE=mockup` no mesmo `agente-fichas`): pega o molde aprovado e monta o
   mockup numa cópia da base `DESENHO\BASE MOCKUPS\2027` na pasta do cliente; regras no `PAPEL_MOCKUP`.
   Não mexe no atendente nem nos agentes do Fábio e do Juninho.
+- Acompanhamento (`agente-acompanhamento/`, porta 4406, sem IA): a cada 10 min lê o quadro do atendente
+  e `dados\conversas.json` (só leitura) e avisa o dono pela assessoria: cliente sem resposta há +30 min
+  (na hora, 9h-18h, seg-sáb) e resumo às 9h, 13h e 16h30. Chaves vêm do `.env` do atendente via o
+  `config.js` dele; estado em `agente-acompanhamento/dados` (fora do git).
 - Painel VENDAS do mês (parede norte da Sala de Serviço, `js/vendas.js` + `/api/vendas`): só lê
   `config.vendas.arquivo` (neste PC, `C:\LED-atendente\app\vendas.json`, que o programa de fichas
   e o atendente do WhatsApp gravam) e soma o mês por vendedor (FÁBIO, JUNINHO). Dia 1º, a partir das

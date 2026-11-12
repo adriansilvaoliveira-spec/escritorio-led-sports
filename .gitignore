@@ -9,3 +9,4 @@ data/reunioes/
 
 agente-fichas/dados*/
 .claude/settings.local.json
+agente-acompanhamento/dados/
