@@ -26,7 +26,8 @@ const MIN = 60 * 1000, HORA = 60 * MIN, DIA = 24 * HORA;
 const SEM_RESPOSTA = 30 * MIN;           // cliente esperando mais que isso vira aviso
 const JANELA_CONVERSA = 7 * DIA;         // conversa mais velha que isso não entra em "sem resposta"
 const PARADO = { desenho: 2 * DIA, aprov: 2 * DIA, fechar: 2 * DIA, fechado: 1 * DIA };
-const RESUMOS = [[9, 0], [13, 0], [16, 30]];
+// O dono só quer saber de problema (12/11): sem resumos automáticos; o botão da tela ainda manda um.
+const RESUMOS = [];
 const FORA = new Set(['nao_fechou', 'entregue', 'producao', 'pronto']);
 
 const { env } = require(path.join(ATENDENTE, 'src', 'config'));
@@ -75,7 +76,8 @@ async function pendencias(agora = Date.now()) {
   for (const c of lerConversas()) {
     if (daCasa(c.id) || FORA.has(c.etapa) || /^LED SPORTS/i.test(c.nome_perfil || '')) continue;
     const cli = c.ultima_cliente || 0, loja = c.ultima_loja || 0;
-    if (cli && cli > loja && agora - cli > SEM_RESPOSTA && agora - cli < JANELA_CONVERSA)
+    // conversa pausada é o dono atendendo pelo celular: não é problema da IA, não avisa
+    if (!c.pausada && cli && cli > loja && agora - cli > SEM_RESPOSTA && agora - cli < JANELA_CONVERSA)
       semResposta.push({ id: c.id, desde: cli, texto: `${quem({ ...c, ...(cards[c.id] || {}) })} há ${quanto(agora - cli)}${c.pausada ? ' (pausada, com você)' : ''}` });
   }
   for (const c of q.cards) {
@@ -154,7 +156,7 @@ function pagina() {
   const lista = (nome, l) => `<h2>${nome} <small>${l.length}</small></h2>` + (l.length ? '<ul>' + l.map(x => `<li>${esc(x.texto)}</li>`).join('') + '</ul>' : '<p class="ok">Nada.</p>');
   return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Acompanhamento</title>
 <style>body{font:15px system-ui,sans-serif;background:#10141c;color:#e6e9ef;margin:0;padding:16px;max-width:820px}h1{font-size:20px}h2{font-size:16px;margin:18px 0 6px}small{color:#8b93a7}li{margin:3px 0}.ok{color:#6ee7a0}button{background:#2563eb;color:#fff;border:0;border-radius:6px;padding:8px 14px;cursor:pointer}pre{color:#8b93a7;font-size:12px;white-space:pre-wrap}</style></head><body>
-<h1>Acompanhamento</h1><p><small>Confere a cada 10 min. Avisa você pela assessoria: cliente sem resposta na hora, e resumo às 9h, 13h e 16h30.${p ? ' Última conferência: ' + new Date(p.quando).toLocaleString('pt-BR') : ''}</small></p>
+<h1>Acompanhamento</h1><p><small>Confere a cada 10 min. Avisa você pela assessoria: só quando um cliente fica sem resposta da IA (conversa pausada não conta).${p ? ' Última conferência: ' + new Date(p.quando).toLocaleString('pt-BR') : ''}</small></p>
 <button onclick="fetch('/api/resumo',{method:'POST'}).then(r=>r.json()).then(j=>alert(j.ok?'Resumo enviado':'Não foi: '+j.motivo))">Mandar resumo agora</button>
 ${p ? lista('Sem resposta', p.semResposta) + lista('Pedido de ajuda aberto', p.ajuda) + lista('Parado', p.parados) : '<p>Ainda conferindo…</p>'}
 <h2>Registro</h2><pre>${esc(estado.log.slice(0, 20).join('\n'))}</pre></body></html>`;
