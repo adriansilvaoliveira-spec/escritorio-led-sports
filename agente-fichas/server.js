@@ -17,17 +17,19 @@ const { spawn } = require('child_process');
 const { pipeline } = require('stream');
 const { acharClaude } = require('../claude-bin');
 
-// a mesma conversa serve aos dois funcionários; AGENTE=desenho troca as regras e as pastas
+// a mesma conversa serve aos três funcionários; AGENTE=desenho ou AGENTE=mockup troca as regras e as pastas
+const EH_MOCKUP = process.env.AGENTE === 'mockup';
 const EH_DESENHO = process.env.AGENTE === 'desenho';
-const PORTA = Number(process.env.PORT) || (EH_DESENHO ? 4404 : 4403);
-const PROJETO = process.env.FICHAS_PROJETO || (EH_DESENHO ? path.join(os.homedir(), 'Downloads', 'SAFUL') : path.join(os.homedir(), 'Desktop', 'sistema automação wpp'));
+const DE_ARTE = EH_DESENHO || EH_MOCKUP; // os dois trabalham na pasta do cliente em ARTES\CLIENTES
+const PORTA = Number(process.env.PORT) || (EH_MOCKUP ? 4405 : EH_DESENHO ? 4404 : 4403);
+const PROJETO = process.env.FICHAS_PROJETO || (DE_ARTE ? path.join(os.homedir(), 'Downloads', 'SAFUL') : path.join(os.homedir(), 'Desktop', 'sistema automação wpp'));
 const PASTA_FICHAS = process.env.FICHAS_DRIVE || 'G:\\Meu Drive\\AUTOMAÇÃO LEDSPORTS ATIBAIA\\FICHAS';
 const PASTA_ARTES = process.env.DESENHO_DRIVE || 'G:\\Meu Drive\\AUTOMAÇÃO LEDSPORTS ATIBAIA\\ARTES\\CLIENTES';
-const DADOS = process.env.FICHAS_DADOS || path.join(__dirname, EH_DESENHO ? 'dados-desenho' : 'dados');
+const DADOS = process.env.FICHAS_DADOS || path.join(__dirname, EH_MOCKUP ? 'dados-mockup' : EH_DESENHO ? 'dados-desenho' : 'dados');
 const ARQ_CONVERSAS = path.join(DADOS, 'conversas.json');
 const LIMITE_ARQUIVO = 200 * 1024 * 1024;
 const LIMITE_JSON = 200 * 1024;
-const LIMITE_EXECUCAO = (EH_DESENHO ? 45 : 15) * 60 * 1000;
+const LIMITE_EXECUCAO = (DE_ARTE ? 45 : 15) * 60 * 1000;
 const FERRAMENTAS = 'Read,Write,Edit,Glob,Grep,Bash,PowerShell';
 // o Desenho também usa o Chrome do dono (Firefly, Aimari) e a internet (modelo atual do time),
 // como nas conversas por cliente do projeto SAFUL
@@ -64,7 +66,18 @@ const PAPEL_DESENHO = [
   'Só pare antes da prévia se for impossível desenhar (ex.: nenhum nome de time nem referência). Telefone ou patrocínio ilegível não trava: deixe o espaço e avise. Nunca fique mais de uma resposta sem entregar prévia.',
   'Limites: nunca envie nada ao cliente; nunca ligue, desligue ou altere o robô do WhatsApp; nunca leia arquivos .env; não apague trabalhos existentes sem o dono pedir.'
 ].join('\n');
-const PAPEL = EH_DESENHO ? PAPEL_DESENHO : PAPEL_FICHAS;
+const PAPEL_MOCKUP = [
+  'Você é o funcionário Mockup da LED SPORTS. Você pega o molde JÁ APROVADO pelo dono (CDR no Corel) e monta o mockup no Photoshop. Você não desenha molde: mudança de arte é com o Desenho.',
+  'Fale em português do Brasil, em texto simples e curto. Comece SEMPRE pela memória receita-liverpool-kit deste projeto (método de mockup, peças em mm, visibilidade) e pela receita-arte-led; abra outra memória só se o trabalho pedir.',
+  'Bases: G:\\Meu Drive\\AUTOMAÇÃO LEDSPORTS ATIBAIA\\DESENHO\\BASE MOCKUPS\\2027 (MODELO <MODELO> 2027.psd). NUNCA altere nem salve a base: copie para a pasta do cliente como "<CLIENTE> - <MODELO> 2027.psd" e trabalhe só na cópia.',
+  'Pasta do cliente: G:\\Meu Drive\\AUTOMAÇÃO LEDSPORTS ATIBAIA\\ARTES\\CLIENTES\\<CLIENTE>. As peças exportadas do molde vão em "mockup pecas". Os JPGs finais ficam na pasta do cliente, sem _ no nome: "<CLIENTE> - MOCKUP CALÇÃO NOVO.jpg", "<CLIENTE> - MOCKUP CALÇÃO NORMAL.jpg" e "<CLIENTE> - MOCKUP SÓ CAMISA.jpg" (só as versões que a base tiver). Prévia de teste leva _ no nome.',
+  'Regras do dono: a camisa é a MESMA em todas as versões (calção novo, normal e só camisa); a frente vai exportada em alta (220 dpi) para o escudo ficar nítido; gola e punho seguem o molde; meião branco se o pedido não disser outra cor; o nome do time vai no texto NOME DO TIME / EMPRESA. Nunca cole pixels de uma versão em outra nem duplique grupo com objeto inteligente: troque só o conteúdo dos objetos inteligentes do topo.',
+  'Photoshop por script (DoJavaScript pelo PowerShell): deixe a camada visível antes de abrir o objeto inteligente e confira se ele abriu de verdade antes de mexer. Se aparecer o aviso "Perfil ausente", o script volta antes da peça abrir: dispense pelo PowerShell ((New-Object -ComObject WScript.Shell).AppActivate(\'Perfil Ausente\') e SendKeys \'{ENTER}\', uma vez por aviso) e trabalhe na .psb que ficou aberta. Nunca feche nem salve arquivo que o dono estiver usando; as outras abas abertas são dele.',
+  'Corel por COM: só leia e exporte o molde aprovado (PublishToPDF com a seleção); nunca salve o CDR.',
+  'Confira as prévias pequenas (700 px) antes de exportar os finais. Ao terminar, escreva o caminho completo de cada JPG final e, em poucas linhas, o que assumiu.',
+  'Limites: nunca envie nada ao cliente; nunca ligue, desligue ou altere o robô do WhatsApp (atendente) nem os agentes do Fábio e do Juninho; nunca leia arquivos .env; NUNCA acesse a pasta Nextcloud2; não apague trabalhos existentes sem o dono pedir.'
+].join('\n');
+const PAPEL = EH_MOCKUP ? PAPEL_MOCKUP : EH_DESENHO ? PAPEL_DESENHO : PAPEL_FICHAS;
 
 /* ---------- conversas em disco ---------- */
 let conversas = [];
@@ -83,7 +96,7 @@ function gravar() {
 
 const limparNome = (t, lim = 80) => String(t || '')
   .replace(/[<>:"/\\|?*\x00-\x1f]/g, ' ').replace(/\s+/g, ' ').replace(/^[.\s]+|[.\s]+$/g, '').slice(0, lim).trim();
-const pastaAnexos = c => EH_DESENHO ? path.join(PASTA_ARTES, c.cliente, 'REFERENCIA') : path.join(PASTA_FICHAS, 'PEDIDOS RECEBIDOS', c.cliente);
+const pastaAnexos = c => DE_ARTE ? path.join(PASTA_ARTES, c.cliente, 'REFERENCIA') : path.join(PASTA_FICHAS, 'PEDIDOS RECEBIDOS', c.cliente);
 const resumo = c => ({ id: c.id, cliente: c.cliente, estado: c.estado, quando: c.atualizado });
 
 /* ---------- Claude: um pedido por vez, porque o Excel só aguenta um ---------- */
@@ -281,4 +294,4 @@ const servidor = http.createServer((req, res) => {
   res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }).end('404');
 });
 
-servidor.listen(PORTA, '127.0.0.1', () => console.log(`Agente ${EH_DESENHO ? 'Desenho' : 'Fichas'} em http://localhost:${PORTA}`));
+servidor.listen(PORTA, '127.0.0.1', () => console.log(`Agente ${EH_MOCKUP ? 'Mockup' : EH_DESENHO ? 'Desenho' : 'Fichas'} em http://localhost:${PORTA}`));
