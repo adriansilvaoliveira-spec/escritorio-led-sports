@@ -75,3 +75,9 @@ mensagem em português dizendo o que mudou, e `git push`. Não deixe mudança s�
   `claude setup-token` guardada em `data/claude-token.json` (fora do git; `envClaude()` em
   `claude-bin.js`). Vence em 13/11/2027: refazer com `claude setup-token` e reiniciar os três.
   `aviso-login.js` (no `server.js`) avisa o dono pela assessoria se eles ficarem sem login.
+- Avisos do atendente ao dono (13/11): no WhatsApp só vão arte para aprovar, ficha para conferir,
+  respostas aos comandos dele e o resumo das 8h e o relatório das 19h30, os dois com as vendas do mês
+  e os clientes esperando resposta, com o tempo de espera (`textoVendasEEspera` em `servidor.js`).
+  Pedido de ajuda da IA, dúvida do Desenho, "fechou o pedido", mensagem ilegível, fora do ar e crédito
+  baixo vão só para o log (`soNoLog`). Só o aviso "créditos ACABARAM" continua indo ao dono.
+  Backup antes da mudança: `servidor.bak-20261113-so-relatorio.js`.
