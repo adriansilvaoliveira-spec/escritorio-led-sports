@@ -71,3 +71,7 @@ mensagem em português dizendo o que mudou, e `git push`. Não deixe mudança s�
   navegador), e o vigia do escritório religa em até 1 min os sistemas de `data/desejados.json`.
 - Ligar/desligar sem janela: `LIGAR-DESLIGAR ESCRITORIO.vbs` (atalho
   "Escritório LED SPORTS" na área de trabalho). Desligar por ele também para o vigia.
+- Login dos funcionários Claude (Fichas 4403, Desenho 4404, Mockup 4405): usam a chave de 1 ano de
+  `claude setup-token` guardada em `data/claude-token.json` (fora do git; `envClaude()` em
+  `claude-bin.js`). Vence em 13/11/2027: refazer com `claude setup-token` e reiniciar os três.
+  `aviso-login.js` (no `server.js`) avisa o dono pela assessoria se eles ficarem sem login.

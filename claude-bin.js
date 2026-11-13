@@ -29,4 +29,15 @@ function acharClaude() {
   return doApp(casa) || (process.platform === 'win32' ? 'claude.exe' : 'claude');   // deixa o PATH resolver
 }
 
-module.exports = { acharClaude };
+/* Ambiente para rodar o Claude dos funcionários. Se existir data/claude-token.json
+   ({"token": "..."}, gerado por `claude setup-token`, vale 1 ano e fica fora do git),
+   usa essa chave fixa: o login comum vence sozinho quando a internet cai na hora de renovar. */
+function envClaude() {
+  try {
+    const { token } = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'claude-token.json'), 'utf8'));
+    if (token) return { ...process.env, CLAUDE_CODE_OAUTH_TOKEN: String(token).trim() };
+  } catch (e) { /* sem chave fixa: usa o login comum */ }
+  return process.env;
+}
+
+module.exports = { acharClaude, envClaude };

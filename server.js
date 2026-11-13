@@ -1022,6 +1022,7 @@ async function vigiar() {
   vigiando = false;
 }
 setInterval(vigiar, 60000);
+require("./aviso-login").iniciar();   // sem login do Claude, os funcionários param calados
 
 /* ===========================================================
    AGENDA — ações com data marcada

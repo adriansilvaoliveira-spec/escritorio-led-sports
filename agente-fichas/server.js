@@ -15,7 +15,7 @@ const os = require('os');
 const crypto = require('crypto');
 const { spawn } = require('child_process');
 const { pipeline } = require('stream');
-const { acharClaude } = require('../claude-bin');
+const { acharClaude, envClaude } = require('../claude-bin');
 
 // a mesma conversa serve aos três funcionários; AGENTE=desenho ou AGENTE=mockup troca as regras e as pastas
 const EH_MOCKUP = process.env.AGENTE === 'mockup';
@@ -130,7 +130,7 @@ function executar(c, prompt, fim) {
   const concluir = () => { if (feito) return false; feito = true; c.estado = 'parada'; return true; };
 
   // sem shell: o texto vai pela entrada padrão e nunca vira comando
-  const proc = spawn(bin, args, { cwd: PROJETO, env: process.env, windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] });
+  const proc = spawn(bin, args, { cwd: PROJETO, env: envClaude(), windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] });
   const prazo = setTimeout(() => {
     avisar('Demorou demais e foi interrompido. Confira a pasta e mande de novo se precisar.');
     try { proc.kill(); } catch (e) { /* já morreu */ }
@@ -235,7 +235,7 @@ function estadoLogin() {
     const fim = dados => { cacheLogin = { quando: Date.now(), dados }; ok(dados); };
     const [bin, ...base] = comandoClaude();
     let saida = '';
-    const p = spawn(bin, [...base, 'auth', 'status'], { windowsHide: true, stdio: ['ignore', 'pipe', 'ignore'] });
+    const p = spawn(bin, [...base, 'auth', 'status'], { env: envClaude(), windowsHide: true, stdio: ['ignore', 'pipe', 'ignore'] });
     const prazo = setTimeout(() => { try { p.kill(); } catch (e) {} }, 8000);
     p.stdout.on('data', d => { saida += d; });
     p.on('error', () => { clearTimeout(prazo); fim({ instalado: false, conectado: false }); });
