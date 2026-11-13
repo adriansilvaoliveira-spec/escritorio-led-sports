@@ -74,7 +74,7 @@ mensagem em português dizendo o que mudou, e `git push`. Não deixe mudança s�
 - Login dos funcionários Claude (Fichas 4403, Desenho 4404, Mockup 4405): usam a chave de 1 ano de
   `claude setup-token` guardada em `data/claude-token.json` (fora do git; `envClaude()` em
   `claude-bin.js`). Vence em 13/11/2027: refazer com `claude setup-token` e reiniciar os três.
-  `aviso-login.js` (no `server.js`) avisa o dono pela assessoria se eles ficarem sem login.
+  Sem aviso no WhatsApp se cair (o dono não quer mais mensagens): conferir em `/api/login` de cada um.
 - Avisos do atendente ao dono (13/11): no WhatsApp só vão arte para aprovar, ficha para conferir,
   respostas aos comandos dele e o resumo das 8h e o relatório das 19h30, os dois com as vendas do mês
   e os clientes esperando resposta, com o tempo de espera (`textoVendasEEspera` em `servidor.js`).
