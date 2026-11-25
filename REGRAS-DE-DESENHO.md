@@ -41,6 +41,12 @@ Quando o dono corrigir algo que vale para outros pedidos, acrescente a regra AQU
   pixels e a mesma resolução (300 dpi) do conteúdo original, senão o quadro sai ampliado.
 - Conferir cada JPG antes de mandar ao dono: sem sobra de cor da base, nada cortado.
 
+## Arte para o cliente
+- Antes de qualquer envio, perguntar ao dono no WhatsApp ("posso mandar?") e só mandar com o ok.
+- Com as duas versões de calção, mandar as duas imagens juntas e explicar que a camisa é a mesma, o
+  que muda é o calção, com o preço do kit de cada opção (tabela oficial em
+  `C:\LED-atendente\TABELA_PRECOS_OFICIAL_2026.txt`; calção novo é adicional por peça).
+
 ## Economia
 - Uma conversa por cliente. Poucas prévias, pequenas. Não reabrir imagem já vista.
 - Se o Google Drive (G:) estiver fora, salvar em Área de Trabalho\escritório\DESENHO\<CLIENTE> e
