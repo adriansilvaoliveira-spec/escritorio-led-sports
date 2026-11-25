@@ -94,6 +94,8 @@ mensagem em português dizendo o que mudou, e `git push`. Não deixe mudança s�
   Sai da lista de quem espera resposta (só volta se o cliente escrever de novo); com `dias_sem_ia`
   a IA também fica fora (e sem lembretes) por esse tempo, mesmo que o dono responda pelo celular.
   Backup antes dessa função: `servidor.bak-20261125-resolvido.js`.
+- Tecidos (regra do dono, 25/11): camisa e CALÇÃO são dry fit; TACTEL é só bermuda. Nunca dizer a
+  cliente que calção é tactel (`dados\catalogo.json` e `src\regras.js` do atendente já corrigidos).
 - O atendente usa `MODELO_IA=claude-sonnet-5-5`, que NÃO aceita `tool_choice` forçado (erro 400):
   em `conversa-dono.js` é `auto` desde 25/11 (backup `conversa-dono.bak-20261125-tool-choice.js`).
   Ao trocar o modelo do atendente, testar a IA do dono antes.
