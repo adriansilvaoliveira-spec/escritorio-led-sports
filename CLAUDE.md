@@ -16,6 +16,8 @@ para a LED SPORTS ATIBAIA. Repositório no GitHub: `escritorio-led-sports` (púb
   altura 80. Calção novo: relativo à peça, escudo centro (+540,-473), número centro X +222 e topo
   -438, logo LED acima do número (topo -421). Em dúvida, abra um molde fechado do mesmo modelo
   (Brasinha, Meninos da Tia, Automa FC) e copie. Detalhes na memória `posicoes-padrao-molde-madrid`.
+- **Molde primeiro, depois mockup:** qualquer ajuste de arte entra no molde de costura e o mockup
+  é montado ou atualizado a partir dele, sem o dono precisar pedir.
 - **Modelos novos (Madrid, Apollo Nova = Red Bull, Isin, Liverpool): sempre as duas versões de
   calção** (novo e normal). Molde do calção novo: `DESENHO\MOLDE DE COSTURA\CAMISAS\CALÇÃO NOVO.cdr`.
 - **Tudo desmembrado:** cada elemento da arte solto (fundo, escritas, retrato, mascote), nunca
