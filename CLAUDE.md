@@ -90,6 +90,9 @@ mensagem em português dizendo o que mudou, e `git push`. Não deixe mudança s�
   depois de "aprovado <time>" ou "aprovar N". Se o dono estiver há +24h sem escrever na assessoria, as
   imagens vão quando ele mandar qualquer mensagem; ao cliente também só vai dentro de 24h da última
   mensagem dele. Backup antes dessa função: `servidor.bak-20261125-arte-varias.js`.
+- O atendente usa `MODELO_IA=claude-sonnet-5-5`, que NÃO aceita `tool_choice` forçado (erro 400):
+  em `conversa-dono.js` é `auto` desde 25/11 (backup `conversa-dono.bak-20261125-tool-choice.js`).
+  Ao trocar o modelo do atendente, testar a IA do dono antes.
 - `agente-fichas/`: conversa por cliente, com anexos, dos funcionários Fichas (porta 4403) e Desenho
   (`AGENTE=desenho`, porta 4404). O cadastro deles está em `data/sistemas.json`. Pelo WhatsApp só o
   Fichas recebe pedido ("Ficha TIME"); desenho é feito direto no Claude.
