@@ -30,6 +30,9 @@ para a LED SPORTS ATIBAIA. Repositório no GitHub: `escritorio-led-sports` (púb
   terminar uma rodada ou quando o dono pedir para fechar, atualize o `STATUS.md` (pronto / em
   andamento / falta / regras desse cliente) e avise que dá para abrir conversa nova. O `STATUS.md`
   fica no Drive, nunca no git. Poucas prévias, em tamanho menor, e não reabra imagens já vistas.
+  O dono usa o celular e não consegue abrir conversa nova: **abra você a sessão do cliente**
+  (`start_session` com brief apontando para a pasta, o PEDIDO e o STATUS.md) quando ele passar a
+  falar de outro cliente, e avise em uma linha qual abriu.
 
 ## Regra: toda atualização vai para o GitHub
 
