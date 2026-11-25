@@ -18,6 +18,10 @@ para a LED SPORTS ATIBAIA. Repositório no GitHub: `escritorio-led-sports` (púb
   (Brasinha, Meninos da Tia, Automa FC) e copie. Detalhes na memória `posicoes-padrao-molde-madrid`.
 - **Molde primeiro, depois mockup:** qualquer ajuste de arte entra no molde de costura e o mockup
   é montado ou atualizado a partir dele, sem o dono precisar pedir.
+- **Nunca mexer nos quadros do mockup** (LOGO, DETALHE GOLA, M. DIREITA, M. ESQUERDA): são padrão
+  e mostram ao cliente o que vai na manga e na gola. Não esconder camadas nem colar recortes. Eles se
+  atualizam sozinhos; o PNG que substitui GOLA DE DENTRO e MANGA precisa ter o mesmo tamanho em
+  pixels e 300 dpi do original, senão o quadro sai ampliado.
 - **Modelos novos (Madrid, Apollo Nova = Red Bull, Isin, Liverpool): sempre as duas versões de
   calção** (novo e normal). Molde do calção novo: `DESENHO\MOLDE DE COSTURA\CAMISAS\CALÇÃO NOVO.cdr`.
 - **Tudo desmembrado:** cada elemento da arte solto (fundo, escritas, retrato, mascote), nunca
