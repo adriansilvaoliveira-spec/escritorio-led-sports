@@ -1,0 +1,47 @@
+# Regras de desenho da LED SPORTS (valem sempre, sem o dono repetir)
+
+Quando o dono corrigir algo que vale para outros pedidos, acrescente a regra AQUI.
+
+## Ordem do trabalho
+1. Ler o PEDIDO e o STATUS.md da pasta do cliente.
+2. Molde de costura primeiro. Mockup só depois, montado a partir do molde. Todo ajuste entra no
+   molde antes de ir ao mockup, sem precisar o dono pedir.
+3. Nada vai ao cliente sem o dono mandar.
+4. No fim, atualizar o STATUS.md (pronto / falta).
+
+## Molde de costura
+- É padrão e não muda. A arte do catálogo ou do cliente entra por cima do molde base da loja
+  (DESENHO\MOLDE DE COSTURA\KITS), dentro de cada peça (PowerClip). Trabalhar em cópia na pasta
+  do cliente. Nunca montar retângulos soltos.
+- Tudo desmembrado: fundo, escritas, retrato, mascote, escudo soltos. Nada achatado.
+- Número, escudo e logo da LED têm lugar fixo. Em dúvida, abrir um molde fechado do mesmo modelo e
+  copiar as posições. No Madrid (mm): número das costas centro X=811, topo 632, altura 240; escudo
+  do peito topo 645, centro X 222, altura 85; LED SPORTS no lugar do molde base, branca por cima.
+- Calção normal (Madrid): escudo centro (332,-662) numa perna; na outra, logo LED e número (centro
+  X=808, topo -629, altura 80). Calção novo: escudo centro (+540,-473) da peça; número centro X +222,
+  topo -438, logo LED acima (topo -421).
+- Madrid, Apollo Nova (Red Bull), Isin e Liverpool: sempre as DUAS versões de calção (novo e normal).
+- O círculo "LED" do modelo de catálogo é o lugar do escudo do cliente: trocar pelo escudo.
+
+## Escudo, nome e número
+- Escudo do cliente tem de ficar 100% igual ao original, em vetor e com qualidade. Conferir lado a
+  lado antes de usar. Se a foto cortar uma ponta, completar o desenho.
+- Escudo escuro em camisa escura: contorno branco (peito e calções).
+- Nome e número só entram se a arte do cliente ou a ficha trouxerem. No calção o dono quer o número e
+  a logo da LED.
+- Sem fonte escolhida pelo cliente: Liverpool, Flamengo ou Adidas (Liverpool primeiro). Avisar qual
+  usou. Conferir se a fonte desenha os acentos e o Ç.
+- Nome do time, quando for nas costas, vai em cima do número.
+
+## Mockup
+- Base em DESENHO\BASE MOCKUPS\2027. Nunca alterar a base: copiar para a pasta do cliente.
+- NUNCA mexer nos quadros LOGO, DETALHE GOLA, M. DIREITA e M. ESQUERDA: são padrão e mostram ao
+  cliente o que vai na manga e na gola. Não esconder camadas nem colar recortes neles.
+- O PNG que substitui o conteúdo de um objeto inteligente de controle precisa ter o mesmo tamanho em
+  pixels e a mesma resolução (300 dpi) do conteúdo original, senão o quadro sai ampliado.
+- Conferir cada JPG antes de mandar ao dono: sem sobra de cor da base, nada cortado.
+
+## Economia
+- Uma conversa por cliente. Poucas prévias, pequenas. Não reabrir imagem já vista.
+- Se o Google Drive (G:) estiver fora, salvar em Área de Trabalho\escritório\DESENHO\<CLIENTE> e
+  copiar para o Drive quando voltar.

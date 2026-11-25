@@ -5,6 +5,11 @@ para a LED SPORTS ATIBAIA. Repositório no GitHub: `escritorio-led-sports` (púb
 
 ## Regras de desenho (molde de costura e mockup) — valem sempre, sem o dono repetir
 
+**Antes de qualquer desenho, leia [REGRAS-DE-DESENHO.md](REGRAS-DE-DESENHO.md)**, a lista completa.
+Correção do dono que valha para outros pedidos vai para lá. Os funcionários Desenho (4404) e Mockup
+(4405) recebem esse arquivo junto com o papel (`agente-fichas/server.js`); mudou o arquivo,
+reinicie os dois.
+
 - **Molde de costura é padrão e não muda.** A arte do catálogo (ex.: MOD 46) ou do cliente entra
   por cima do molde base da loja (`DESENHO\MOLDE DE COSTURA\KITS\KIT MADRID.cdr` etc.), em PowerClip
   dentro de cada peça. Trabalhe numa cópia na pasta do cliente. Nunca monte retângulos soltos.

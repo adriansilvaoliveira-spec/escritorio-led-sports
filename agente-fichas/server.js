@@ -77,7 +77,11 @@ const PAPEL_MOCKUP = [
   'Confira as prévias pequenas (700 px) antes de exportar os finais. Ao terminar, escreva o caminho completo de cada JPG final e, em poucas linhas, o que assumiu.',
   'Limites: nunca envie nada ao cliente; nunca ligue, desligue ou altere o robô do WhatsApp (atendente) nem os agentes do Fábio e do Juninho; nunca leia arquivos .env; NUNCA acesse a pasta Nextcloud2; não apague trabalhos existentes sem o dono pedir.'
 ].join('\n');
-const PAPEL = EH_MOCKUP ? PAPEL_MOCKUP : EH_DESENHO ? PAPEL_DESENHO : PAPEL_FICHAS;
+// regras que o dono já ditou: Desenho e Mockup recebem o arquivo inteiro junto com o papel
+let REGRAS_DESENHO = '';
+try { REGRAS_DESENHO = fs.readFileSync(path.join(__dirname, '..', 'REGRAS-DE-DESENHO.md'), 'utf8'); } catch (e) { console.warn('REGRAS-DE-DESENHO.md não encontrado'); }
+const PAPEL = (EH_MOCKUP ? PAPEL_MOCKUP : EH_DESENHO ? PAPEL_DESENHO : PAPEL_FICHAS) +
+  (DE_ARTE && REGRAS_DESENHO ? '\n\n' + REGRAS_DESENHO : '');
 
 /* ---------- conversas em disco ---------- */
 let conversas = [];
