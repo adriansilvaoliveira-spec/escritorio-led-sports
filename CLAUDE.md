@@ -3,6 +3,29 @@
 Instalação do [a2labsnutrition/Escritorio-de-agentes](https://github.com/a2labsnutrition/Escritorio-de-agentes)
 para a LED SPORTS ATIBAIA. Repositório no GitHub: `escritorio-led-sports` (público), branch `main`.
 
+## Regras de desenho (molde de costura e mockup) — valem sempre, sem o dono repetir
+
+- **Molde de costura é padrão e não muda.** A arte do catálogo (ex.: MOD 46) ou do cliente entra
+  por cima do molde base da loja (`DESENHO\MOLDE DE COSTURA\KITS\KIT MADRID.cdr` etc.), em PowerClip
+  dentro de cada peça. Trabalhe numa cópia na pasta do cliente. Nunca monte retângulos soltos.
+- **Número, escudo e logo da LED têm lugar fixo** (mm, no KIT MADRID; FRENTE L=-204 T=780 621x759,
+  COSTAS L=501 T=900 621x878): número das costas centro X=811, topo 632, altura 240; escudo do peito
+  topo 645, centro X≈222, altura 85 (ponto verde do molde); LED SPORTS da frente (L=-27 T=612) e das
+  costas (L=786 T=870) ficam brancos por cima da arte. Calção normal: escudo centro (332,-662) na
+  PERNAD; na PERNAE o logo LED do molde base (pintar de branco) e o número centro X=808, topo -629,
+  altura 80. Calção novo: relativo à peça, escudo centro (+540,-473), número centro X +222 e topo
+  -438, logo LED acima do número (topo -421). Em dúvida, abra um molde fechado do mesmo modelo
+  (Brasinha, Meninos da Tia, Automa FC) e copie. Detalhes na memória `posicoes-padrao-molde-madrid`.
+- **Modelos novos (Madrid, Apollo Nova = Red Bull, Isin, Liverpool): sempre as duas versões de
+  calção** (novo e normal). Molde do calção novo: `DESENHO\MOLDE DE COSTURA\CAMISAS\CALÇÃO NOVO.cdr`.
+- **Tudo desmembrado:** cada elemento da arte solto (fundo, escritas, retrato, mascote), nunca
+  agrupado nem achatado.
+- **Fonte de número/nome sem escolha do cliente:** Liverpool, Flamengo ou alguma da Adidas
+  (Liverpool primeiro); avisar o dono qual usou. Nome e número só entram se a arte do cliente ou a
+  ficha trouxer; no calção o dono quer o número (e o logo da LED) mesmo assim.
+- O círculo "LED" dos modelos do catálogo é reserva do escudo do cliente: troque pelo escudo.
+- Nada vai ao cliente sem o dono mandar.
+
 ## Regra: toda atualização vai para o GitHub
 
 Depois de qualquer mudança nos arquivos deste projeto: `git add -A`, commit com
