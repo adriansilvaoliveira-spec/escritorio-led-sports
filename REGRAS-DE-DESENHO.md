@@ -33,6 +33,13 @@ Quando o dono corrigir algo que vale para outros pedidos, acrescente a regra AQU
   usou. Conferir se a fonte desenha os acentos e o Ç.
 - Nome do time, quando for nas costas, vai em cima do número.
 
+## Cores
+- Só as cores da paleta Corel da empresa (`Desktop\CORES COREL.xml`, paleta "CORES COREL").
+  É obrigatório e não se pergunta a paleta ao dono: ela já está no computador.
+- Cor pedida que não existe na paleta: usar a mais próxima e dizer qual foi (RGB). Ex.: azul bebê =
+  R0 G180 B232; azul marinho = R0 G33 B69.
+- Escudo e logos de patrocinadores mantêm as cores deles.
+
 ## Mockup
 - Base em DESENHO\BASE MOCKUPS\2027. Nunca alterar a base: copiar para a pasta do cliente.
 - NUNCA mexer nos quadros LOGO, DETALHE GOLA, M. DIREITA e M. ESQUERDA: são padrão e mostram ao
