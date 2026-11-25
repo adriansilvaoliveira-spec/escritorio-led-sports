@@ -84,6 +84,12 @@ mensagem em português dizendo o que mudou, e `git push`. Não deixe mudança s�
   `POST 3300/painel/api/enviar {para, texto, combinado?}` entra no histórico (e `combinado` na observação
   da ficha); catálogo/tabela a um cliente: `POST 3300/painel/api/documento {id, chave:'modelos:FUTEBOL', texto}`.
   Tirar um card do Kanban: `POST 3300/painel/api/excluir {id}` (a conversa fica em `dados\excluidas.json`).
+- Mandar arte ao cliente (uma ou várias imagens, ex.: mockup calção novo e normal), SEMPRE pedindo o
+  ok do dono: `POST 3300/painel/api/arte-para-aprovar {id, arquivos:[JPGs de ARTES\CLIENTES], texto}`
+  (via `fetch` em node). O robô manda as imagens ao dono e pergunta "Posso mandar?"; só vai ao cliente
+  depois de "aprovado <time>" ou "aprovar N". Se o dono estiver há +24h sem escrever na assessoria, as
+  imagens vão quando ele mandar qualquer mensagem; ao cliente também só vai dentro de 24h da última
+  mensagem dele. Backup antes dessa função: `servidor.bak-20261125-arte-varias.js`.
 - `agente-fichas/`: conversa por cliente, com anexos, dos funcionários Fichas (porta 4403) e Desenho
   (`AGENTE=desenho`, porta 4404). O cadastro deles está em `data/sistemas.json`. Pelo WhatsApp só o
   Fichas recebe pedido ("Ficha TIME"); desenho é feito direto no Claude.
