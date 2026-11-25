@@ -90,6 +90,10 @@ mensagem em português dizendo o que mudou, e `git push`. Não deixe mudança s�
   depois de "aprovado <time>" ou "aprovar N". Se o dono estiver há +24h sem escrever na assessoria, as
   imagens vão quando ele mandar qualquer mensagem; ao cliente também só vai dentro de 24h da última
   mensagem dele. Backup antes dessa função: `servidor.bak-20261125-arte-varias.js`.
+- Cliente que o dono diz que já está resolvido: `POST 3300/painel/api/resolvido {id, dias_sem_ia?}`.
+  Sai da lista de quem espera resposta (só volta se o cliente escrever de novo); com `dias_sem_ia`
+  a IA também fica fora (e sem lembretes) por esse tempo, mesmo que o dono responda pelo celular.
+  Backup antes dessa função: `servidor.bak-20261125-resolvido.js`.
 - O atendente usa `MODELO_IA=claude-sonnet-5-5`, que NÃO aceita `tool_choice` forçado (erro 400):
   em `conversa-dono.js` é `auto` desde 25/11 (backup `conversa-dono.bak-20261125-tool-choice.js`).
   Ao trocar o modelo do atendente, testar a IA do dono antes.
