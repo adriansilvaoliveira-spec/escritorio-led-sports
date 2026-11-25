@@ -79,6 +79,19 @@ function lerQuadro() {
    JSON com { data: 'AAAA-MM-DD', vendedor, total, pecas } por ficha) e soma
    o mês atual por vendedor. Só lê: quem escreve é o sistema de fichas. */
 const semAcento = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').trim().toUpperCase();
+// Lista de despesas: JSON com { data: 'AAAA-MM-DD', descricao, valor (R$) } por gasto.
+function despesasDoMes(mes, arquivo) {
+  const r = { lista: [], total: 0, erro: null };
+  let lista = [];
+  try { lista = JSON.parse(fs.readFileSync(arquivo, 'utf8')); }
+  catch (e) { if (e.code !== 'ENOENT') r.erro = 'não consegui ler a lista de despesas'; }
+  for (const x of Array.isArray(lista) ? lista : []) {
+    if (!String(x.data || '').startsWith(mes)) continue;
+    r.lista.push({ data: x.data, descricao: String(x.descricao || ''), valor: Number(x.valor) || 0 });
+  }
+  r.total = Math.round(r.lista.reduce((s, x) => s + x.valor, 0) * 100) / 100;
+  return r;
+}
 function vendasDoMes(agora = new Date()) {
   const cfg = lerConfig().vendas;
   const mes = `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}`;
@@ -99,6 +112,10 @@ function vendasDoMes(agora = new Date()) {
   }
   r.vendedores = [...por.values()];
   r.total = Math.round(r.vendedores.reduce((s, v) => s + v.total, 0) * 100) / 100;
+  // Despesas do mês (mensalidades, serviços): lista ao lado da de vendas, abatida do total.
+  const g = despesasDoMes(mes, cfg.despesas || path.join(path.dirname(cfg.arquivo), 'despesas.json'));
+  r.despesas = g.lista; r.gastos = g.total; r.fica = Math.round((r.total - g.total) * 100) / 100;
+  if (g.erro && !r.erro) r.erro = g.erro;
   return r;
 }
 const PORT = Number(process.env.PORT) || Number(lerConfig().porta) || 4321;

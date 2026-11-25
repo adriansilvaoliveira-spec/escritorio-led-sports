@@ -520,7 +520,7 @@ const WORLD = (() => {
   const brl = v => 'R$ ' + (Number(v) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   function signVendas(c, len, rgbOn) {
     const d = (typeof VENDAS !== 'undefined') ? VENDAS.dados() : { vendedores: [] };
-    const x0 = 8, y0 = 12, w = len - 16, h = 84;
+    const x0 = 8, y0 = 12, w = len - 16, h = Number(d.gastos) > 0 ? 94 : 84; // linha GASTOS: placa mais alta (cabe em WALL_H)
     c.fillStyle = 'rgba(5,7,13,.9)';
     ISO.rrect(c, x0, y0, w, h, 8); c.fill();
     c.strokeStyle = 'rgba(35,224,138,.35)'; c.lineWidth = 1.4; c.stroke();
@@ -544,7 +544,9 @@ const WORLD = (() => {
       c.fillText(aviso, x0 + 14, y0 + 42);
       return;
     }
-    const linhas = d.vendedores.slice(0, 3);
+    // com despesas no mês, a placa ganha a linha GASTOS e mostra até 2 vendedores (cabe na parede)
+    const temGastos = Number(d.gastos) > 0;
+    const linhas = d.vendedores.slice(0, temGastos ? 2 : 3);
     linhas.forEach((v, i) => {
       const ry = y0 + 36 + i * 15;
       c.textAlign = 'left';
@@ -569,6 +571,27 @@ const WORLD = (() => {
       c.font = "700 10px 'Barlow', sans-serif";
       c.fillStyle = '#c4b8ff';
       c.fillText(brl(d.total), x0 + w - 14, ry);
+    }
+    if (temGastos) {
+      const ry = y0 + 34 + (linhas.length + (linhas.length > 1 ? 1 : 0)) * 15;
+      c.textAlign = 'left';
+      c.font = "600 8.5px 'Barlow Semi Condensed', sans-serif";
+      c.fillStyle = 'rgba(180,190,215,.7)';
+      c.fillText('GASTOS', x0 + 14, ry);
+      c.font = "700 10px 'Barlow', sans-serif";
+      c.fillStyle = '#ff7a8a';
+      c.fillText('− ' + brl(d.gastos), x0 + 50, ry);
+      c.textAlign = 'right';
+      c.font = "600 8.5px 'Barlow Semi Condensed', sans-serif";
+      c.fillStyle = 'rgba(180,190,215,.7)';
+      const valorFica = brl(d.fica);
+      c.font = "700 11px 'Barlow', sans-serif";
+      const larg = c.measureText(valorFica).width;
+      c.fillStyle = '#23e08a';
+      c.fillText(valorFica, x0 + w - 14, ry);
+      c.font = "600 8.5px 'Barlow Semi Condensed', sans-serif";
+      c.fillStyle = 'rgba(180,190,215,.7)';
+      c.fillText('FICA', x0 + w - 14 - larg - 5, ry);
     }
     c.textAlign = 'left';
   }
