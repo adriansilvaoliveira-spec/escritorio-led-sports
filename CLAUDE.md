@@ -25,6 +25,11 @@ para a LED SPORTS ATIBAIA. Repositório no GitHub: `escritorio-led-sports` (púb
   ficha trouxer; no calção o dono quer o número (e o logo da LED) mesmo assim.
 - O círculo "LED" dos modelos do catálogo é reserva do escudo do cliente: troque pelo escudo.
 - Nada vai ao cliente sem o dono mandar.
+- **Economia de tokens:** uma conversa por cliente/tarefa. Ao começar um cliente, leia o
+  `PEDIDO*.txt` e o `STATUS.md` da pasta dele (`ARTES\CLIENTES\<CLIENTE>\`) antes de mexer. Ao
+  terminar uma rodada ou quando o dono pedir para fechar, atualize o `STATUS.md` (pronto / em
+  andamento / falta / regras desse cliente) e avise que dá para abrir conversa nova. O `STATUS.md`
+  fica no Drive, nunca no git. Poucas prévias, em tamanho menor, e não reabra imagens já vistas.
 
 ## Regra: toda atualização vai para o GitHub
 
