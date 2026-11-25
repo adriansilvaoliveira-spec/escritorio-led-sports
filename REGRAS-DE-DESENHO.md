@@ -41,6 +41,18 @@ Quando o dono corrigir algo que vale para outros pedidos, acrescente a regra AQU
   pixels e a mesma resolução (300 dpi) do conteúdo original, senão o quadro sai ampliado.
 - Conferir cada JPG antes de mandar ao dono: sem sobra de cor da base, nada cortado.
 
+## Banco de dados (guardar todo logo)
+- Todo logo que fizermos, recebermos, recuperarmos ou criarmos do zero é salvo em
+  `DESENHO\BANCO DE DADOS`, na pasta certa: `ESCUDOS` (times e instituições), `MASCOTES`,
+  `PATROCINIOS`. Salvar o original do cliente e a versão em vetor.
+- Nome do arquivo com o nome do time ou da marca, para achar na pesquisa. Ex.: `SIBI (vetor).cdr`,
+  `SIBI (original cliente).ai`.
+- Salvar assim que o logo ficar pronto, e sempre antes de apagar qualquer coisa da pasta do cliente.
+
+## Pasta do cliente
+- Pedido fechado e limpeza: ficam o molde de costura (.cdr), o mockup (.psd) e o JPG do mockup. O
+  resto pode ser apagado quando o dono pedir (guardando antes os logos no banco).
+
 ## Arte para o cliente
 - Antes de qualquer envio, perguntar ao dono no WhatsApp ("posso mandar?") e só mandar com o ok.
 - Com as duas versões de calção, mandar as duas imagens juntas e explicar que a camisa é a mesma, o
