@@ -94,6 +94,9 @@ mensagem em português dizendo o que mudou, e `git push`. Não deixe mudança s�
   Sai da lista de quem espera resposta (só volta se o cliente escrever de novo); com `dias_sem_ia`
   a IA também fica fora (e sem lembretes) por esse tempo, mesmo que o dono responda pelo celular.
   Backup antes dessa função: `servidor.bak-20261125-resolvido.js`.
+- Dono mandou na conversa "manda essas artes pro cliente": `POST 3300/painel/api/arte-cliente
+  {id, arquivos:[JPGs de ARTES\CLIENTES], texto}` vai direto ao cliente (SÓ com essa ordem dele; sem
+  ordem, usar `arte-para-aprovar`). Backup antes: `servidor.bak-20261125-arte-cliente.js`.
 - Tecidos (regra do dono, 25/11): camisa e CALÇÃO são dry fit; TACTEL é só bermuda. Nunca dizer a
   cliente que calção é tactel (`dados\catalogo.json` e `src\regras.js` do atendente já corrigidos).
 - O atendente usa `MODELO_IA=claude-sonnet-5-5`, que NÃO aceita `tool_choice` forçado (erro 400):
