@@ -94,6 +94,8 @@ mensagem em português dizendo o que mudou, e `git push`. Não deixe mudança s�
   Sai da lista de quem espera resposta (só volta se o cliente escrever de novo); com `dias_sem_ia`
   a IA também fica fora (e sem lembretes) por esse tempo, mesmo que o dono responda pelo celular.
   Backup antes dessa função: `servidor.bak-20261125-resolvido.js`.
+  Parceiro da loja (ex.: Camila, como o Dema), que a IA nunca deve responder: mesma rota com
+  `{nao_atender:true}` (entra na lista de não atender e sai dos relatórios).
   Cliente que o dono deixa pendente e não quer arte sem pagamento: mesma rota com
   `{manter_pendente:true, dias_sem_ia:3, sem_arte:true, observacao}`. Nunca travar por mais tempo sem
   ele pedir: o padrão é a trava normal de 3 dias, e se o cliente escrever depois, a loja atende.
