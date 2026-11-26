@@ -94,8 +94,9 @@ mensagem em português dizendo o que mudou, e `git push`. Não deixe mudança s�
   Sai da lista de quem espera resposta (só volta se o cliente escrever de novo); com `dias_sem_ia`
   a IA também fica fora (e sem lembretes) por esse tempo, mesmo que o dono responda pelo celular.
   Backup antes dessa função: `servidor.bak-20261125-resolvido.js`.
-  Pendente que o dono não quer que a IA atenda nem gere arte (ex.: cliente que já fez perder tempo,
-  só desenhar com pagamento): mesma rota com `{manter_pendente:true, dias_sem_ia:365, observacao}`.
+  Cliente que o dono deixa pendente e não quer arte sem pagamento: mesma rota com
+  `{manter_pendente:true, dias_sem_ia:3, sem_arte:true, observacao}`. Nunca travar por mais tempo sem
+  ele pedir: o padrão é a trava normal de 3 dias, e se o cliente escrever depois, a loja atende.
 - Dono mandou na conversa "manda essas artes pro cliente": `POST 3300/painel/api/arte-cliente
   {id, arquivos:[JPGs de ARTES\CLIENTES], texto}` vai direto ao cliente (SÓ com essa ordem dele; sem
   ordem, usar `arte-para-aprovar`). Backup antes: `servidor.bak-20261125-arte-cliente.js`.
