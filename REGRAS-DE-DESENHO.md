@@ -42,6 +42,9 @@ Quando o dono corrigir algo que vale para outros pedidos, acrescente a regra AQU
   É obrigatório e não se pergunta a paleta ao dono: ela já está no computador.
 - Cor pedida que não existe na paleta: usar a mais próxima e dizer qual foi (RGB). Ex.: azul bebê =
   R0 G180 B232; azul marinho = R0 G33 B69.
+- Vale para TODAS as peças e detalhes, também quando a arte é "igual à imagem" ou vem do Firefly:
+  trocar pela cor da paleta, nunca copiar o RGB da referência. Antes de mostrar o molde, conferir os
+  preenchimentos e contornos no próprio .cdr e a cor que sai no JPG.
 - Escudo e logos de patrocinadores mantêm as cores deles.
 
 ## Mockup
