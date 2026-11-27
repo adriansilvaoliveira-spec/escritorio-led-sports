@@ -38,6 +38,9 @@ Quando o dono corrigir algo que vale para outros pedidos, acrescente a regra AQU
 - Sem fonte escolhida pelo cliente: Liverpool, Flamengo ou Adidas (Liverpool primeiro). Avisar qual
   usou. Conferir se a fonte desenha os acentos e o Ç.
 - Nome do time, quando for nas costas, vai em cima do número.
+- Nome e número NUNCA em curvas: ficam em texto vivo, na própria fonte, em todos os moldes (costas e
+  calção), para quem for produzir ver qual é a fonte e poder redigitar. Efeito em arco, degradê ou
+  contorno é aplicado no texto sem converter. Conferir no .cdr antes de entregar.
 
 ## Cores
 - Só as cores da paleta Corel da empresa (`Desktop\CORES COREL.xml`, paleta "CORES COREL").
