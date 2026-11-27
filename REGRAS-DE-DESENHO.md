@@ -46,6 +46,7 @@ Quando o dono corrigir algo que vale para outros pedidos, acrescente a regra AQU
   trocar pela cor da paleta, nunca copiar o RGB da referência. Antes de mostrar o molde, conferir os
   preenchimentos e contornos no próprio .cdr e a cor que sai no JPG.
 - Escudo e logos de patrocinadores mantêm as cores deles.
+- Única outra exceção: quando o dono pedir uma cor fora da paleta.
 
 ## Mockup
 - Base em DESENHO\BASE MOCKUPS\2027. Nunca alterar a base: copiar para a pasta do cliente.
