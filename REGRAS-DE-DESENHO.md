@@ -26,6 +26,8 @@ Quando o dono corrigir algo que vale para outros pedidos, acrescente a regra AQU
   Se a arte de referência tiver outra marca ou símbolo nesse lugar (ex.: no alto das costas), tirar
   o dela e manter o da LED. Só muda se o dono mandar para aquele cliente.
 - Modelo slim: gola lisa, sem as linhas/listras da arte de referência.
+- Tamanho de escudo e logos é padrão, NÃO copiar o tamanho da imagem de referência: escudo do peito
+  85 mm de altura, mangas 80 mm; calção e logos LED como no molde fechado do mesmo modelo.
 
 ## Escudo, nome e número
 - Escudo do cliente tem de ficar 100% igual ao original, em vetor e com qualidade. Conferir lado a
